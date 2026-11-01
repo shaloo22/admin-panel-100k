@@ -2,19 +2,39 @@ import { Router } from "express";
 import pool from "../db/pool.js";
 
 const router = Router();
+const escapeLike = (text) => text.replace(/[\\%_]/g, "\\$&");
 
 router.get("/", async (req, res) => {
   try {
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 100);
     const offset = (page - 1) * limit;
+    const search = String(req.query.search || "").trim();
+
+    const params = [];
+    const conditions = [];
+
+    if (search) {
+      params.push(`%${escapeLike(search)}%`);
+      conditions.push(
+        `(name ILIKE $${params.length} OR email ILIKE $${params.length})`,
+      );
+    }
+
+    const whereSql = conditions.length
+      ? `WHERE ${conditions.join(" AND ")}`
+      : "";
+
+    const dataSql = `
+      SELECT * FROM users ${whereSql}
+      ORDER BY id
+      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+    `;
+    const countSql = `SELECT COUNT(*) FROM users ${whereSql}`;
 
     const [dataResult, countResult] = await Promise.all([
-      pool.query("SELECT * FROM users ORDER BY id LIMIT $1 OFFSET $2", [
-        limit,
-        offset,
-      ]),
-      pool.query("SELECT COUNT(*) FROM users"),
+      pool.query(dataSql, [...params, limit, offset]),
+      pool.query(countSql, params),
     ]);
 
     const total = parseInt(countResult.rows[0].count);
@@ -24,7 +44,7 @@ router.get("/", async (req, res) => {
       page,
       limit,
       total,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.max(Math.ceil(total / limit), 1),
     });
   } catch (err) {
     console.error(err);

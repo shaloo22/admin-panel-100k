@@ -1,7 +1,10 @@
 const API_URL = "http://localhost:4000";
 
-export async function fetchUsers(page = 1, limit = 50) {
-  const res = await fetch(`${API_URL}/api/users?page=${page}&limit=${limit}`);
+export async function fetchUsers(page = 1, limit = 50, search = "") {
+  const params = new URLSearchParams({ page, limit });
+  if (search) params.set("search", search);
+
+  const res = await fetch(`${API_URL}/api/users?${params}`);
   if (!res.ok) throw new Error("Failed to fetch users");
   return res.json();
 }
