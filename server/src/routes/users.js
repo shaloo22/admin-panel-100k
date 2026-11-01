@@ -3,6 +3,16 @@ import pool from "../db/pool.js";
 
 const router = Router();
 const escapeLike = (text) => text.replace(/[\\%_]/g, "\\$&");
+const SORT_COLUMNS = [
+  "id",
+  "name",
+  "email",
+  "city",
+  "status",
+  "revenue",
+  "created_at",
+  "last_login",
+];
 
 router.get("/", async (req, res) => {
   try {
@@ -10,6 +20,9 @@ router.get("/", async (req, res) => {
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 100);
     const offset = (page - 1) * limit;
     const search = String(req.query.search || "").trim();
+
+    const sort = SORT_COLUMNS.includes(req.query.sort) ? req.query.sort : "id";
+    const order = req.query.order === "desc" ? "DESC" : "ASC";
 
     const params = [];
     const conditions = [];
@@ -27,7 +40,7 @@ router.get("/", async (req, res) => {
 
     const dataSql = `
       SELECT * FROM users ${whereSql}
-      ORDER BY id
+      ORDER BY ${sort} ${order} NULLS LAST, id ASC
       LIMIT $${params.length + 1} OFFSET $${params.length + 2}
     `;
     const countSql = `SELECT COUNT(*) FROM users ${whereSql}`;

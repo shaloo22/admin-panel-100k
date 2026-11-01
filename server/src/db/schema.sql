@@ -6,5 +6,6 @@ CREATE TABLE USERS (
     status VARCHAR(20)  NOT NULL DEFAULT 'active'
               CHECK (status IN ('active', 'inactive', 'banned')),
     created_at  TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    revenue     NUMERIC(12,2) NOT NULL DEFAULT 0,
     last_login  TIMESTAMPTZ 
 );

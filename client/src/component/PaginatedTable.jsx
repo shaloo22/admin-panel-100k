@@ -1,6 +1,19 @@
 import { useEffect, useState } from 'react';
 import { fetchUsers } from '../api/users';
 import { useDebounce } from '../hooks/useDebounce';
+import { formatCurrency, formatDate } from '../utils/format';
+import StatusBadge from './StatusBadge';
+
+const COLUMNS = [
+  { key: 'id', label: 'ID' },
+  { key: 'name', label: 'Name' },
+  { key: 'email', label: 'Email' },
+  { key: 'city', label: 'City' },
+  { key: 'status', label: 'Status' },
+  { key: 'revenue', label: 'Revenue' },
+  { key: 'created_at', label: 'Created' },
+  { key: 'last_login', label: 'Last Login' },
+];
 
 function PaginatedTable() {
   const [users, setUsers] = useState([]);
@@ -8,6 +21,8 @@ function PaginatedTable() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('id');
+  const [order, setOrder] = useState('asc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -18,7 +33,7 @@ function PaginatedTable() {
     setLoading(true);
     setError('');
 
-    fetchUsers(page, 50, debouncedSearch)
+    fetchUsers({ page, limit: 50, search: debouncedSearch, sort, order })
       .then((result) => {
         if (!ignore) {
           setUsers(result.data);
@@ -36,10 +51,20 @@ function PaginatedTable() {
     return () => {
       ignore = true;
     };
-  }, [page, debouncedSearch]);
+  }, [page, debouncedSearch, sort, order]);
 
   const handleSearch = (value) => {
     setSearch(value);
+    setPage(1);
+  };
+
+  const handleSort = (column) => {
+    if (sort === column) {
+      setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSort(column);
+      setOrder('asc');
+    }
     setPage(1);
   };
 
@@ -67,13 +92,16 @@ function PaginatedTable() {
         <table>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>City</th>
-              <th>Status</th>
-              <th>Created</th>
-              <th>Last Login</th>
+              {COLUMNS.map((col) => (
+                <th
+                  key={col.key}
+                  className={`sortable ${col.key === 'revenue' ? 'num' : ''}`}
+                  onClick={() => handleSort(col.key)}
+                >
+                  {col.label}{' '}
+                  {sort === col.key && (order === 'asc' ? '▲' : '▼')}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -83,13 +111,12 @@ function PaginatedTable() {
                 <td>{user.name}</td>
                 <td>{user.email}</td>
                 <td>{user.city}</td>
-                <td>{user.status}</td>
-                <td>{new Date(user.created_at).toLocaleDateString()}</td>
                 <td>
-                  {user.last_login
-                    ? new Date(user.last_login).toLocaleDateString()
-                    : 'Never'}
+                  <StatusBadge status={user.status} />
                 </td>
+                <td className="num">{formatCurrency(user.revenue)}</td>
+                <td>{formatDate(user.created_at)}</td>
+                <td>{formatDate(user.last_login)}</td>
               </tr>
             ))}
           </tbody>

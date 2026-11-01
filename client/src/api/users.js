@@ -1,7 +1,13 @@
 const API_URL = "http://localhost:4000";
 
-export async function fetchUsers(page = 1, limit = 50, search = "") {
-  const params = new URLSearchParams({ page, limit });
+export async function fetchUsers({
+  page = 1,
+  limit = 50,
+  search = "",
+  sort = "id",
+  order = "asc",
+} = {}) {
+  const params = new URLSearchParams({ page, limit, sort, order });
   if (search) params.set("search", search);
 
   const res = await fetch(`${API_URL}/api/users?${params}`);

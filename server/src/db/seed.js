@@ -3,7 +3,7 @@ import pool from "./pool.js";
 
 const TOTAL = 100000;
 const BATCH_SIZE = 1000;
-const COLUMNS = 6;
+const COLUMNS = 8;
 
 const CITIES = [
   "Delhi",
@@ -36,9 +36,13 @@ async function seed() {
         ? null
         : faker.date.between({ from: createdAt, to: new Date() });
 
+      const revenue = neverLoggedIn
+        ? 0
+        : faker.number.int({ min: 500, max: 100000 });
+
       const base = j * COLUMNS;
       placeholders.push(
-        `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6})`,
+        `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7})`,
       );
 
       values.push(
@@ -52,11 +56,12 @@ async function seed() {
         ]),
         createdAt,
         lastLogin,
+        revenue,
       );
     }
 
     const sql = `
-      INSERT INTO users (name, email, city, status, created_at, last_login)
+      INSERT INTO users (name, email, city, status, created_at, last_login, revenue)
       VALUES ${placeholders.join(", ")}
     `;
     await pool.query(sql, values);
