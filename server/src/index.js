@@ -2,9 +2,12 @@ import express from "express";
 import cors from "cors";
 import "dotenv/config";
 import pool from "./db/pool.js";
+import usersRouter from "./routes/users.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+app.use("/api/users", usersRouter);
 
 app.use(cors());
 app.use(express.json());
