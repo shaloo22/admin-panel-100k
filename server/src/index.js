@@ -7,8 +7,6 @@ import usersRouter from "./routes/users.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use("/api/users", usersRouter);
-
 app.use(cors());
 app.use(express.json());
 
@@ -29,6 +27,8 @@ app.get("/api/db-test", async (req, res) => {
     res.status(500).json({ error: "Database connection failed" });
   }
 });
+
+app.use("/api/users", usersRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

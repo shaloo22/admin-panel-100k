@@ -1,0 +1,57 @@
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+  font-family: system-ui, sans-serif;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+th {
+  background: #f5f5f5;
+}
+
+.pagination {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.error {
+  color: red;
+}
+
+.tabs,
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0;
+}
+
+.tabs button.active {
+  background: #333;
+  color: white;
+}
+
+.table-wrapper {
+  height: 500px;
+  overflow: auto;
+  border: 1px solid #ddd;
+}
+
+th {
+  position: sticky;
+  top: 0;
+}

@@ -32,4 +32,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+// TEMPORARY: sirf stress test ke liye
+router.get("/all", async (req, res) => {
+  try {
+    const count = Math.min(parseInt(req.query.count) || 20000, 50000);
+    const result = await pool.query(
+      "SELECT * FROM users ORDER BY id LIMIT $1",
+      [count],
+    );
+    res.json({ data: result.rows, count: result.rows.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
 export default router;
