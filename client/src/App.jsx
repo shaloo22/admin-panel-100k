@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import PaginatedTable from './component/PaginatedTable';
 import PlainTable from './component/PlainTable';
+import VirtualTable from './component/VirtualTable';
 import './App.css';
 
 function App() {
@@ -23,10 +24,17 @@ function App() {
         >
           Plain (stress test)
         </button>
+        <button
+  className={view === 'virtual' ? 'active' : ''}
+  onClick={() => setView('virtual')}
+>
+  Virtualized
+</button>
       </div>
 
       {view === 'paginated' && <PaginatedTable />}
       {view === 'plain' && <PlainTable />}
+      {view === 'virtual' && <VirtualTable />}
     </div>
   );
 }

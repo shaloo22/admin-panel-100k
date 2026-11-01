@@ -55,3 +55,44 @@ th {
   position: sticky;
   top: 0;
 }
+.v-header,
+.v-row {
+  display: grid;
+  grid-template-columns: 70px 1.4fr 2fr 1fr 1fr 1fr 1fr;
+  align-items: center;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.v-header {
+  background: #f5f5f5;
+  font-weight: 600;
+  height: 40px;
+  border: 1px solid #ddd;
+  border-bottom: none;
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+}
+
+.v-body {
+  height: 500px;
+  overflow: auto;
+  border: 1px solid #ddd;
+  scrollbar-gutter: stable;
+}
+
+.v-row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  border-bottom: 1px solid #eee;
+}
+
+.v-header > div,
+.v-row > div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 8px;
+}
