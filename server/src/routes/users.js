@@ -14,15 +14,22 @@ const SORT_COLUMNS = [
   "last_login",
 ];
 
+const STATUSES = ["active", "inactive", "banned"];
+
 router.get("/", async (req, res) => {
   try {
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 100);
     const offset = (page - 1) * limit;
-    const search = String(req.query.search || "").trim();
 
     const sort = SORT_COLUMNS.includes(req.query.sort) ? req.query.sort : "id";
     const order = req.query.order === "desc" ? "DESC" : "ASC";
+
+    const search = String(req.query.search || "").trim();
+    const city = String(req.query.city || "").trim();
+    const status = String(req.query.status || "").trim();
+    const minRevenue = parseFloat(req.query.minRevenue);
+    const neverLoggedIn = req.query.neverLoggedIn === "true";
 
     const params = [];
     const conditions = [];
@@ -32,6 +39,21 @@ router.get("/", async (req, res) => {
       conditions.push(
         `(name ILIKE $${params.length} OR email ILIKE $${params.length})`,
       );
+    }
+    if (city) {
+      params.push(city);
+      conditions.push(`city = $${params.length}`);
+    }
+    if (STATUSES.includes(status)) {
+      params.push(status);
+      conditions.push(`status = $${params.length}`);
+    }
+    if (!Number.isNaN(minRevenue) && minRevenue > 0) {
+      params.push(minRevenue);
+      conditions.push(`revenue >= $${params.length}`);
+    }
+    if (neverLoggedIn) {
+      conditions.push("last_login IS NULL");
     }
 
     const whereSql = conditions.length
@@ -76,6 +98,18 @@ router.get("/all", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+router.get("/cities", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT DISTINCT city FROM users WHERE city IS NOT NULL ORDER BY city",
+    );
+    res.json(result.rows.map((row) => row.city));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch cities" });
   }
 });
 

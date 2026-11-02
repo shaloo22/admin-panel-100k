@@ -131,3 +131,58 @@ th {
   background: #fee2e2;
   color: #991b1b;
 }
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.filter-bar select,
+.filter-bar input[type='number'] {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.check {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #e8f0fe;
+  color: #1a3d8f;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.chip button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  color: inherit;
+}
+
+.link-btn {
+  border: none;
+  background: transparent;
+  color: #1a3d8f;
+  cursor: pointer;
+  text-decoration: underline;
+}

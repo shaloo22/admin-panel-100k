@@ -3,6 +3,8 @@ import { fetchUsers } from '../api/users';
 import { useDebounce } from '../hooks/useDebounce';
 import { formatCurrency, formatDate } from '../utils/format';
 import StatusBadge from './StatusBadge';
+import FilterBar from './FilterBar';
+import FilterChips from './FilterChips';
 
 const COLUMNS = [
   { key: 'id', label: 'ID' },
@@ -15,25 +17,33 @@ const COLUMNS = [
   { key: 'last_login', label: 'Last Login' },
 ];
 
+const INITIAL_FILTERS = {
+  search: '',
+  city: '',
+  status: '',
+  minRevenue: '',
+  neverLoggedIn: false,
+};
+
 function PaginatedTable() {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useState(INITIAL_FILTERS);
   const [sort, setSort] = useState('id');
   const [order, setOrder] = useState('asc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const debouncedSearch = useDebounce(search, 300);
+  const debouncedFilters = useDebounce(filters, 300);
 
   useEffect(() => {
     let ignore = false;
     setLoading(true);
     setError('');
 
-    fetchUsers({ page, limit: 50, search: debouncedSearch, sort, order })
+    fetchUsers({ page, limit: 50, sort, order, filters: debouncedFilters })
       .then((result) => {
         if (!ignore) {
           setUsers(result.data);
@@ -51,10 +61,17 @@ function PaginatedTable() {
     return () => {
       ignore = true;
     };
-  }, [page, debouncedSearch, sort, order]);
+  }, [page, sort, order, debouncedFilters]);
 
-  const handleSearch = (value) => {
-    setSearch(value);
+  const updateFilter = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setPage(1);
+  };
+
+  const removeFilter = (key) => updateFilter(key, INITIAL_FILTERS[key]);
+
+  const clearFilters = () => {
+    setFilters(INITIAL_FILTERS);
     setPage(1);
   };
 
@@ -75,12 +92,18 @@ function PaginatedTable() {
           className="search-input"
           type="text"
           placeholder="Search name or email..."
-          value={search}
-          onChange={(e) => handleSearch(e.target.value)}
+          value={filters.search}
+          onChange={(e) => updateFilter('search', e.target.value)}
         />
-        {search && <button onClick={() => handleSearch('')}>✕</button>}
         <span>{total.toLocaleString()} records</span>
       </div>
+
+      <FilterBar filters={filters} onChange={updateFilter} />
+      <FilterChips
+        filters={filters}
+        onRemove={removeFilter}
+        onClearAll={clearFilters}
+      />
 
       {error && <p className="error">{error}</p>}
 
