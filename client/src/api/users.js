@@ -31,3 +31,13 @@ export async function fetchManyUsers(count = 20000) {
   if (!res.ok) throw new Error("Failed to fetch users");
   return res.json();
 }
+
+export async function exportUsersCsv({ filters, sort, order, ids }) {
+  const res = await fetch(`${API_URL}/api/users/export`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ filters, sort, order, ids }),
+  });
+  if (!res.ok) throw new Error("Export failed");
+  return res.blob();
+}
