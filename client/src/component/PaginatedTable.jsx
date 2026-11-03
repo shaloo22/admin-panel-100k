@@ -5,6 +5,7 @@ import { formatCurrency, formatDate } from '../utils/format';
 import StatusBadge from './StatusBadge';
 import FilterBar from './FilterBar';
 import FilterChips from './FilterChips';
+import { readUrlState, writeUrlState } from '../utils/urlState';
 
 const COLUMNS = [
   { key: 'id', label: 'ID' },
@@ -26,15 +27,17 @@ const INITIAL_FILTERS = {
 };
 
 function PaginatedTable() {
+  const [initial] = useState(readUrlState);
   const [users, setUsers] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(initial.page);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
-  const [filters, setFilters] = useState(INITIAL_FILTERS);
-  const [sort, setSort] = useState('id');
-  const [order, setOrder] = useState('asc');
+  const [filters, setFilters] = useState(initial.filters);
+  const [sort, setSort] = useState(initial.sort);
+  const [order, setOrder] = useState(initial.order);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const debouncedFilters = useDebounce(filters, 300);
 
@@ -63,6 +66,10 @@ function PaginatedTable() {
     };
   }, [page, sort, order, debouncedFilters]);
 
+    useEffect(() => {
+    writeUrlState({ page, sort, order, filters });
+  }, [page, sort, order, filters]);
+
   const updateFilter = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
     setPage(1);
@@ -85,6 +92,16 @@ function PaginatedTable() {
     setPage(1);
   };
 
+    const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setError('Could not copy link');
+    }
+  };
+
   return (
     <div>
       <div className="toolbar">
@@ -96,6 +113,9 @@ function PaginatedTable() {
           onChange={(e) => updateFilter('search', e.target.value)}
         />
         <span>{total.toLocaleString()} records</span>
+        <button className="share-btn" onClick={handleShare}>
+          {copied ? '✓ Copied!' : '🔗 Share'}
+        </button>
       </div>
 
       <FilterBar filters={filters} onChange={updateFilter} />

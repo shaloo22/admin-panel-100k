@@ -186,3 +186,6 @@ th {
   cursor: pointer;
   text-decoration: underline;
 }
+.share-btn {
+  margin-left: auto;
+}
