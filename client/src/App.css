@@ -189,3 +189,23 @@ th {
 .share-btn {
   margin-left: auto;
 }
+
+.check-col {
+  width: 40px;
+  text-align: center;
+}
+
+.selection-bar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  background: #fff7e0;
+  border: 1px solid #f3dd9a;
+  border-radius: 6px;
+}
+
+tr.selected-row {
+  background: #f0f6ff;
+}

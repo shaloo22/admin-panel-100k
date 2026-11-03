@@ -2,7 +2,9 @@ import { Router } from "express";
 import pool from "../db/pool.js";
 
 const router = Router();
+
 const escapeLike = (text) => text.replace(/[\\%_]/g, "\\$&");
+
 const SORT_COLUMNS = [
   "id",
   "name",
@@ -13,8 +15,62 @@ const SORT_COLUMNS = [
   "created_at",
   "last_login",
 ];
-
 const STATUSES = ["active", "inactive", "banned"];
+const EXPORT_COLUMNS = [...SORT_COLUMNS];
+const MAX_EXPORT = 50000;
+const MAX_SELECTED_IDS = 5000;
+
+function parseSort(input = {}) {
+  const sort = SORT_COLUMNS.includes(input.sort) ? input.sort : "id";
+  const order = input.order === "desc" ? "DESC" : "ASC";
+  return { sort, order };
+}
+
+function buildFilters(input = {}) {
+  const params = [];
+  const conditions = [];
+
+  const search = String(input.search || "").trim();
+  const city = String(input.city || "").trim();
+  const status = String(input.status || "").trim();
+  const minRevenue = parseFloat(input.minRevenue);
+  const neverLoggedIn =
+    input.neverLoggedIn === true || input.neverLoggedIn === "true";
+
+  if (search) {
+    params.push(`%${escapeLike(search)}%`);
+    conditions.push(
+      `(name ILIKE $${params.length} OR email ILIKE $${params.length})`,
+    );
+  }
+  if (city) {
+    params.push(city);
+    conditions.push(`city = $${params.length}`);
+  }
+  if (STATUSES.includes(status)) {
+    params.push(status);
+    conditions.push(`status = $${params.length}`);
+  }
+  if (!Number.isNaN(minRevenue) && minRevenue > 0) {
+    params.push(minRevenue);
+    conditions.push(`revenue >= $${params.length}`);
+  }
+  if (neverLoggedIn) {
+    conditions.push("last_login IS NULL");
+  }
+
+  return { params, conditions };
+}
+
+const toWhere = (conditions) =>
+  conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+
+function csvCell(value) {
+  if (value === null || value === undefined) return "";
+  let text = value instanceof Date ? value.toISOString() : String(value);
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
+}
 
 router.get("/", async (req, res) => {
   try {
@@ -22,43 +78,9 @@ router.get("/", async (req, res) => {
     const limit = Math.min(Math.max(parseInt(req.query.limit) || 50, 1), 100);
     const offset = (page - 1) * limit;
 
-    const sort = SORT_COLUMNS.includes(req.query.sort) ? req.query.sort : "id";
-    const order = req.query.order === "desc" ? "DESC" : "ASC";
-
-    const search = String(req.query.search || "").trim();
-    const city = String(req.query.city || "").trim();
-    const status = String(req.query.status || "").trim();
-    const minRevenue = parseFloat(req.query.minRevenue);
-    const neverLoggedIn = req.query.neverLoggedIn === "true";
-
-    const params = [];
-    const conditions = [];
-
-    if (search) {
-      params.push(`%${escapeLike(search)}%`);
-      conditions.push(
-        `(name ILIKE $${params.length} OR email ILIKE $${params.length})`,
-      );
-    }
-    if (city) {
-      params.push(city);
-      conditions.push(`city = $${params.length}`);
-    }
-    if (STATUSES.includes(status)) {
-      params.push(status);
-      conditions.push(`status = $${params.length}`);
-    }
-    if (!Number.isNaN(minRevenue) && minRevenue > 0) {
-      params.push(minRevenue);
-      conditions.push(`revenue >= $${params.length}`);
-    }
-    if (neverLoggedIn) {
-      conditions.push("last_login IS NULL");
-    }
-
-    const whereSql = conditions.length
-      ? `WHERE ${conditions.join(" AND ")}`
-      : "";
+    const { sort, order } = parseSort(req.query);
+    const { params, conditions } = buildFilters(req.query);
+    const whereSql = toWhere(conditions);
 
     const dataSql = `
       SELECT * FROM users ${whereSql}
@@ -87,6 +109,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/cities", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT DISTINCT city FROM users WHERE city IS NOT NULL ORDER BY city",
+    );
+    res.json(result.rows.map((row) => row.city));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch cities" });
+  }
+});
+
+// TEMPORARY
 router.get("/all", async (req, res) => {
   try {
     const count = Math.min(parseInt(req.query.count) || 20000, 50000);
@@ -101,15 +136,38 @@ router.get("/all", async (req, res) => {
   }
 });
 
-router.get("/cities", async (req, res) => {
+router.post("/export", async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT DISTINCT city FROM users WHERE city IS NOT NULL ORDER BY city",
-    );
-    res.json(result.rows.map((row) => row.city));
+    const body = req.body || {};
+    const { sort, order } = parseSort(body);
+    const { params, conditions } = buildFilters(body.filters);
+
+    const ids = Array.isArray(body.ids)
+      ? body.ids.filter((id) => Number.isInteger(id)).slice(0, MAX_SELECTED_IDS)
+      : [];
+    if (ids.length) {
+      params.push(ids);
+      conditions.push(`id = ANY($${params.length}::int[])`);
+    }
+
+    const sql = `
+      SELECT ${EXPORT_COLUMNS.join(", ")} FROM users ${toWhere(conditions)}
+      ORDER BY ${sort} ${order} NULLS LAST, id ASC
+      LIMIT $${params.length + 1}
+    `;
+    const result = await pool.query(sql, [...params, MAX_EXPORT]);
+
+    const lines = [EXPORT_COLUMNS.join(",")];
+    result.rows.forEach((row) => {
+      lines.push(EXPORT_COLUMNS.map((col) => csvCell(row[col])).join(","));
+    });
+
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", 'attachment; filename="users.csv"');
+    res.send("\uFEFF" + lines.join("\n"));
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Failed to fetch cities" });
+    res.status(500).json({ error: "Failed to export users" });
   }
 });
 
