@@ -41,3 +41,17 @@ export async function exportUsersCsv({ filters, sort, order, ids }) {
   if (!res.ok) throw new Error("Export failed");
   return res.blob();
 }
+
+export async function updateUser(id, changes) {
+  const res = await fetch(`${API_URL}/api/users/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(changes),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || "Update failed");
+  }
+  return res.json();
+}

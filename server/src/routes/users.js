@@ -171,4 +171,55 @@ router.post("/export", async (req, res) => {
   }
 });
 
+router.patch("/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id < 1) {
+      return res.status(400).json({ error: "Invalid id" });
+    }
+
+    const body = req.body || {};
+    const sets = [];
+    const params = [];
+
+    if (body.name !== undefined) {
+      const name = String(body.name).trim();
+      if (!name || name.length > 100) {
+        return res
+          .status(400)
+          .json({ error: "Name must be 1 to 100 characters" });
+      }
+      params.push(name);
+      sets.push(`name = $${params.length}`);
+    }
+
+    if (body.status !== undefined) {
+      if (!STATUSES.includes(body.status)) {
+        return res.status(400).json({ error: "Invalid status" });
+      }
+      params.push(body.status);
+      sets.push(`status = $${params.length}`);
+    }
+
+    if (sets.length === 0) {
+      return res.status(400).json({ error: "Nothing to update" });
+    }
+
+    params.push(id);
+    const result = await pool.query(
+      `UPDATE users SET ${sets.join(", ")} WHERE id = $${params.length} RETURNING *`,
+      params,
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
 export default router;

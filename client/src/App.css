@@ -209,3 +209,46 @@ th {
 tr.selected-row {
   background: #f0f6ff;
 }
+.editable {
+  cursor: text;
+  border-bottom: 1px dashed transparent;
+}
+
+.editable:hover {
+  border-bottom-color: #999;
+}
+
+.edit-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 6px;
+  border: 1px solid #4c8bf5;
+  border-radius: 4px;
+}
+
+.status-select {
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 6px;
+  border-radius: 999px;
+}
+
+.status-select option {
+  background: white;
+  color: #111;
+}
+
+.is-fetching {
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.notice {
+  padding: 8px 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 6px;
+}

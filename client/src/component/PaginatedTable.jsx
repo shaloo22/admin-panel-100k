@@ -1,12 +1,18 @@
-import { useEffect, useState } from 'react';
-import { exportUsersCsv, fetchUsers } from '../api/users';
+import { useState, useEffect } from 'react';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import { exportUsersCsv, fetchUsers, updateUser } from '../api/users';
 import { useDebounce } from '../hooks/useDebounce';
 import { formatCurrency, formatDate } from '../utils/format';
 import { downloadBlob } from '../utils/download';
 import { readUrlState, writeUrlState } from '../utils/urlState';
-import StatusBadge from './StatusBadge';
 import FilterBar from './FilterBar';
 import FilterChips from './FilterChips';
+import EditableText from './EditableText';
 
 const COLUMNS = [
   { key: 'id', label: 'ID' },
@@ -28,46 +34,83 @@ const INITIAL_FILTERS = {
 };
 
 function PaginatedTable() {
+  const queryClient = useQueryClient();
+
   const [initial] = useState(readUrlState);
-  const [users, setUsers] = useState([]);
   const [page, setPage] = useState(initial.page);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
   const [filters, setFilters] = useState(initial.filters);
   const [sort, setSort] = useState(initial.sort);
   const [order, setOrder] = useState(initial.order);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const [selectedIds, setSelectedIds] = useState(() => new Set());
   const [exporting, setExporting] = useState(false);
+  const [notice, setNotice] = useState('');
 
   const debouncedFilters = useDebounce(filters, 300);
 
-  useEffect(() => {
-    let ignore = false;
-    setLoading(true);
-    setError('');
+  const showNotice = (message) => {
+    setNotice(message);
+    setTimeout(() => setNotice(''), 4000);
+  };
 
-    fetchUsers({ page, limit: 50, sort, order, filters: debouncedFilters })
-      .then((result) => {
-        if (!ignore) {
-          setUsers(result.data);
-          setTotalPages(result.totalPages);
-          setTotal(result.total);
-        }
-      })
-      .catch((err) => {
-        if (!ignore) setError(err.message);
-      })
-      .finally(() => {
-        if (!ignore) setLoading(false);
+  const { data, isLoading, isFetching, isError, error } = useQuery({
+    queryKey: ['users', { page, sort, order, filters: debouncedFilters }],
+    queryFn: ({ signal }) =>
+      fetchUsers({
+        page,
+        limit: 50,
+        sort,
+        order,
+        filters: debouncedFilters,
+        signal,
+      }),
+    placeholderData: keepPreviousData,
+  });
+
+  const users = data?.data ?? [];
+  const total = data?.total ?? 0;
+  const totalPages = data?.totalPages ?? 1;
+
+  // optimistic update
+  const updateMutation = useMutation({
+    mutationFn: ({ id, changes }) => updateUser(id, changes),
+
+    onMutate: async ({ id, changes }) => {
+  
+      await queryClient.cancelQueries({ queryKey: ['users'] });
+
+
+      const snapshots = queryClient.getQueriesData({ queryKey: ['users'] });
+
+      queryClient.setQueriesData({ queryKey: ['users'] }, (old) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: old.data.map((user) =>
+            user.id === id ? { ...user, ...changes } : user
+          ),
+        };
       });
 
-    return () => {
-      ignore = true;
-    };
-  }, [page, sort, order, debouncedFilters]);
+      return { snapshots };
+    },
+
+    onError: (err, variables, context) => {
+      context?.snapshots.forEach(([key, snapshot]) => {
+        queryClient.setQueryData(key, snapshot);
+      });
+      showNotice(`Update failed: ${err.message}. Changes were rolled back.`);
+    },
+
+    
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+
+  const handleUpdate = (id, changes) => {
+    updateMutation.mutate({ id, changes });
+  };
 
   useEffect(() => {
     writeUrlState({ page, sort, order, filters });
@@ -101,11 +144,10 @@ function PaginatedTable() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      setError('Could not copy link');
+      showNotice('Could not copy link');
     }
   };
 
-  // selection: derived values (state se nikale, alag state nahi)
   const pageIds = users.map((user) => user.id);
   const allSelected =
     pageIds.length > 0 && pageIds.every((id) => selectedIds.has(id));
@@ -131,7 +173,6 @@ function PaginatedTable() {
 
   const handleExport = async () => {
     setExporting(true);
-    setError('');
     try {
       const hasSelection = selectedIds.size > 0;
       const blob = await exportUsersCsv({
@@ -143,7 +184,7 @@ function PaginatedTable() {
       const day = new Date().toISOString().slice(0, 10);
       downloadBlob(blob, `users-${day}.csv`);
     } catch (err) {
-      setError(err.message);
+      showNotice(err.message);
     } finally {
       setExporting(false);
     }
@@ -188,14 +229,15 @@ function PaginatedTable() {
         </div>
       )}
 
-      {error && <p className="error">{error}</p>}
+      {isError && <p className="error">{error.message}</p>}
+      {notice && <p className="notice">{notice}</p>}
 
-      {loading ? (
+      {isLoading ? (
         <p>Loading...</p>
       ) : users.length === 0 ? (
         <p>No users found</p>
       ) : (
-        <table>
+        <table className={isFetching ? 'is-fetching' : ''}>
           <thead>
             <tr>
               <th className="check-col">
@@ -236,11 +278,26 @@ function PaginatedTable() {
                   />
                 </td>
                 <td>{user.id}</td>
-                <td>{user.name}</td>
+                <td>
+                  <EditableText
+                    value={user.name}
+                    onSave={(name) => handleUpdate(user.id, { name })}
+                  />
+                </td>
                 <td>{user.email}</td>
                 <td>{user.city}</td>
                 <td>
-                  <StatusBadge status={user.status} />
+                  <select
+                    className={`status-select badge badge-${user.status}`}
+                    value={user.status}
+                    onChange={(e) =>
+                      handleUpdate(user.id, { status: e.target.value })
+                    }
+                  >
+                    <option value="active">active</option>
+                    <option value="inactive">inactive</option>
+                    <option value="banned">banned</option>
+                  </select>
                 </td>
                 <td className="num">{formatCurrency(user.revenue)}</td>
                 <td>{formatDate(user.created_at)}</td>
