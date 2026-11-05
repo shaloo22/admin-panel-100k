@@ -107,6 +107,7 @@ function PaginatedTable() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
       queryClient.invalidateQueries({ queryKey: ['stats'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
 

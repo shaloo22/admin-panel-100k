@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router';
 import { LayoutDashboard, Users, Gauge, Menu } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -74,8 +75,11 @@ function Layout() {
               Admin Panel
             </span>
           </div>
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-white">
-            A
+                    <div className="flex items-center gap-3">
+            <NotificationBell />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-white">
+              A
+            </div>
           </div>
         </header>
 

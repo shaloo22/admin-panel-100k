@@ -1,5 +1,6 @@
 import { Router } from "express";
 import pool from "../db/pool.js";
+import { notify } from "../db/notify.js";
 
 const router = Router();
 
@@ -162,6 +163,10 @@ router.post("/export", async (req, res) => {
       lines.push(EXPORT_COLUMNS.map((col) => csvCell(row[col])).join(","));
     });
 
+    notify("export", `CSV export completed: ${result.rows.length} rows`).catch(
+      (e) => console.error("notify failed:", e.message),
+    );
+
     res.setHeader("Content-Type", "text/csv; charset=utf-8");
     res.setHeader("Content-Disposition", 'attachment; filename="users.csv"');
     res.send("\uFEFF" + lines.join("\n"));
@@ -214,6 +219,15 @@ router.patch("/:id", async (req, res) => {
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "User not found" });
     }
+    const updated = result.rows[0];
+    const parts = [];
+    if (body.status !== undefined)
+      parts.push(`status set to ${updated.status}`);
+    if (body.name !== undefined)
+      parts.push(`name changed to "${updated.name}"`);
+    notify("user_updated", `User #${updated.id}: ${parts.join(", ")}`).catch(
+      (e) => console.error("notify failed:", e.message),
+    );
 
     res.json(result.rows[0]);
   } catch (err) {

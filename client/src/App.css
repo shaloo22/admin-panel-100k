@@ -319,3 +319,27 @@ td {
     left: 98px;
   }
 }
+
+.notif-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  background: white;
+  padding: 10px 16px;
+  text-align: left;
+}
+
+.notif-item:hover {
+  background: #f8fafc;
+}
+
+.notif-item.unread {
+  background: #eef2ff;
+}
+
+.notif-item.unread:hover {
+  background: #e0e7ff;
+}
