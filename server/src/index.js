@@ -3,6 +3,7 @@ import cors from "cors";
 import "dotenv/config";
 import pool from "./db/pool.js";
 import usersRouter from "./routes/users.js";
+import statsRouter from "./routes/stats.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -29,6 +30,7 @@ app.get("/api/db-test", async (req, res) => {
 });
 
 app.use("/api/users", usersRouter);
+app.use('/api/stats', statsRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

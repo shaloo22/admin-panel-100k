@@ -1,48 +1,20 @@
-import { useState } from 'react';
-import PaginatedTable from './component/PaginatedTable';
-import PlainTable from './component/PlainTable';
-import VirtualTable from './component/VirtualTable';
-import FilterBar from './component/FilterBar';
-import FilterChips from './component/FilterChips';
+import { Route, Routes } from 'react-router';
+import Layout from './component/Layout';
+import DashboardPage from './pages/DashboardPage';
+import UsersPage from './pages/UsersPage';
+import LabPage from './pages/LabPage';
 import './App.css';
 
 function App() {
-  const [view, setView] = useState('paginated');
-
   return (
-    <div className="container">
-      <h1>Users Admin Panel</h1>
-
-      <div className="tabs">
-        <button
-          className={view === 'paginated' ? 'active' : ''}
-          onClick={() => setView('paginated')}
-        >
-          Paginated
-        </button>
-        <button
-          className={view === 'plain' ? 'active' : ''}
-          onClick={() => setView('plain')}
-        >
-          Plain (stress test)
-        </button>
-        <button
-  className={view === 'virtual' ? 'active' : ''}
-  onClick={() => setView('virtual')}
->
-  Virtualized
-</button>
-
-      </div>
-
-      {view === 'paginated' && <PaginatedTable />}
-      {view === 'plain' && <PlainTable />}
-      {view === 'virtual' && <VirtualTable />}
-      {view === 'FilterBar' && <FilterBar />}
-      {view === 'FilterChips' && <FilterChips />}
-
-
-    </div>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route index element={<DashboardPage />} />
+        <Route path="users" element={<UsersPage />} />
+        <Route path="lab" element={<LabPage />} />
+        <Route path="*" element={<p>Page not found</p>} />
+      </Route>
+    </Routes>
   );
 }
 

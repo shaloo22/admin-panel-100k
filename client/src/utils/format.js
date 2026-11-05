@@ -7,3 +7,12 @@ const currency = new Intl.NumberFormat("en-IN", {
 export const formatCurrency = (value) => currency.format(Number(value));
 export const formatDate = (value) =>
   value ? new Date(value).toLocaleDateString("en-IN") : "Never";
+
+const compact = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
+
+export const formatCompactCurrency = (value) => compact.format(Number(value));

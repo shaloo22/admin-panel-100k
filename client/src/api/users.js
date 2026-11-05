@@ -55,3 +55,9 @@ export async function updateUser(id, changes) {
   }
   return res.json();
 }
+
+export async function fetchStats(signal) {
+  const res = await fetch(`${API_URL}/api/stats`, { signal });
+  if (!res.ok) throw new Error('Failed to fetch stats');
+  return res.json();
+}

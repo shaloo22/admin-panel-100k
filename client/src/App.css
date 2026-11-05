@@ -252,3 +252,70 @@ tr.selected-row {
   color: #991b1b;
   border-radius: 6px;
 }
+.icon-btn {
+  border: none;
+  background: transparent;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.icon-btn:hover {
+  background: #f1f5f9;
+}
+
+td {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.scooter-track {
+  position: relative;
+  width: 260px;
+  height: 52px;
+  overflow: hidden;
+  border-bottom: 2px dashed #c7d2fe;
+}
+
+.scooter {
+  position: absolute;
+  bottom: 2px;
+  left: -70px;
+  animation: scooter-ride 2.2s linear infinite;
+}
+
+.scooter-body {
+  animation: scooter-bob 0.35s ease-in-out infinite alternate;
+}
+
+.scooter-wheel {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: scooter-spin 0.5s linear infinite;
+}
+
+@keyframes scooter-ride {
+  from { left: -70px; }
+  to { left: 100%; }
+}
+
+@keyframes scooter-bob {
+  from { transform: translateY(0); }
+  to { transform: translateY(-1.5px); }
+}
+
+@keyframes scooter-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scooter,
+  .scooter-body,
+  .scooter-wheel {
+    animation: none;
+  }
+  .scooter {
+    left: 98px;
+  }
+}

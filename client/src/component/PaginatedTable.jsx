@@ -13,6 +13,7 @@ import { readUrlState, writeUrlState } from '../utils/urlState';
 import FilterBar from './FilterBar';
 import FilterChips from './FilterChips';
 import EditableText from './EditableText';
+import ScooterLoader from './ScooterLoader';
 
 const COLUMNS = [
   { key: 'id', label: 'ID' },
@@ -105,6 +106,7 @@ function PaginatedTable() {
     
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['stats'] });
     },
   });
 
@@ -233,7 +235,7 @@ function PaginatedTable() {
       {notice && <p className="notice">{notice}</p>}
 
       {isLoading ? (
-        <p>Loading...</p>
+        <ScooterLoader />
       ) : users.length === 0 ? (
         <p>No users found</p>
       ) : (

@@ -34,5 +34,5 @@ export function writeUrlState({ page, sort, order, filters }) {
 
   const query = params.toString();
   const url = query ? `?${query}` : window.location.pathname;
-  window.history.replaceState(null, "", url);
+  window.history.replaceState(window.history.state, "", url);
 }
