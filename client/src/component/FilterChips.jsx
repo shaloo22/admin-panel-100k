@@ -6,6 +6,8 @@ const CHIP_LABELS = {
   status: (v) => `Status: ${v}`,
   minRevenue: (v) => `Revenue ≥ ${formatCurrency(v)}`,
   neverLoggedIn: () => 'Never logged in',
+  createdFrom: (v) => `Signed up from ${v}`,
+  createdTo: (v) => `Signed up until ${v}`,
 };
 
 function FilterChips({ filters, onRemove, onClearAll }) {

@@ -5,6 +5,7 @@ import pool from "./db/pool.js";
 import usersRouter from "./routes/users.js";
 import statsRouter from "./routes/stats.js";
 import notificationsRouter from "./routes/notifications.js";
+import aiRouter from "./routes/ai.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -33,6 +34,7 @@ app.get("/api/db-test", async (req, res) => {
 app.use("/api/users", usersRouter);
 app.use("/api/stats", statsRouter);
 app.use("/api/notifications", notificationsRouter);
+app.use("/api/ai", aiRouter);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

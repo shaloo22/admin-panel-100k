@@ -1,7 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import {
+  ArrowUpRight,
   IndianRupee,
+  RefreshCw,
   TrendingUp,
   UserCheck,
   UserPlus,
@@ -12,95 +14,181 @@ import { fetchStats } from '../api/users';
 import { formatCompactCurrency, formatCurrency } from '../utils/format';
 import ScooterLoader from '../component/ScooterLoader';
 
+// Colors for each card theme (full class names, so Tailwind can find them)
 const THEMES = {
   indigo: {
-    top: 'border-t-indigo-500',
+    soft: 'bg-indigo-100',
     icon: 'bg-indigo-100 text-indigo-600',
-    pill: 'bg-indigo-50 text-indigo-700',
+    text: 'text-indigo-600',
   },
   emerald: {
-    top: 'border-t-emerald-500',
+    soft: 'bg-emerald-100',
     icon: 'bg-emerald-100 text-emerald-600',
-    pill: 'bg-emerald-50 text-emerald-700',
+    text: 'text-emerald-600',
   },
   violet: {
-    top: 'border-t-violet-500',
+    soft: 'bg-violet-100',
     icon: 'bg-violet-100 text-violet-600',
-    pill: 'bg-violet-50 text-violet-700',
+    text: 'text-violet-600',
   },
   sky: {
-    top: 'border-t-sky-500',
+    soft: 'bg-sky-100',
     icon: 'bg-sky-100 text-sky-600',
-    pill: 'bg-sky-50 text-sky-700',
+    text: 'text-sky-600',
   },
   amber: {
-    top: 'border-t-amber-500',
+    soft: 'bg-amber-100',
     icon: 'bg-amber-100 text-amber-600',
-    pill: 'bg-amber-50 text-amber-700',
+    text: 'text-amber-600',
   },
   rose: {
-    top: 'border-t-rose-500',
+    soft: 'bg-rose-100',
     icon: 'bg-rose-100 text-rose-600',
-    pill: 'bg-rose-50 text-rose-700',
+    text: 'text-rose-600',
   },
 };
 
+// Colors used inside the donut chart (SVG needs real color codes)
 const STATUS_COLORS = {
-  active: 'bg-emerald-500',
-  inactive: 'bg-amber-500',
-  banned: 'bg-rose-500',
+  active: '#10b981',
+  inactive: '#f59e0b',
+  banned: '#f43f5e',
 };
 
-function StatCard({ label, value, hint, to, icon: Icon, theme }) {
+// Big KPI card: icon, label, number and a small hint
+function KpiCard({ label, value, hint, to, icon: Icon, theme }) {
   const t = THEMES[theme];
-  const Wrapper = to ? Link : 'div';
-  const wrapperProps = to ? { to } : {};
 
-  return (
-    <Wrapper
-      {...wrapperProps}
-      className="block rounded-xl transition hover:-translate-y-0.5 hover:shadow-lg"
-    >
-      <div
-        className={`rounded-xl border border-t-4 border-slate-200 bg-white p-5 shadow-sm ${t.top}`}
-      >
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm font-medium text-slate-500">{label}</p>
-            <p className="mt-2 text-3xl font-bold tracking-tight">{value}</p>
-          </div>
-          <div
-            className={`flex h-11 w-11 items-center justify-center rounded-xl ${t.icon}`}
-          >
-            <Icon size={22} />
-          </div>
+  const card = (
+    <div className="relative h-full overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      {/* Soft circle in the corner, just for decoration */}
+      <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-60 ${t.soft}`} />
+
+      <div className="relative">
+        <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${t.icon}`}>
+          <Icon size={20} />
         </div>
-        {hint && (
-          <p
-            className={`mt-3 inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${t.pill}`}
-          >
-            {hint}
-          </p>
-        )}
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {label}
+        </p>
+        <p className="mt-1 text-3xl font-bold tabular-nums text-slate-900">{value}</p>
+        {hint && <p className={`mt-2 text-xs font-medium ${t.text}`}>{hint}</p>}
       </div>
-    </Wrapper>
+    </div>
+  );
+
+  // If the card has a link, wrap it so the user can click it
+  if (!to) return card;
+  return (
+    <Link to={to} className="block h-full rounded-xl transition hover:-translate-y-0.5 hover:shadow-md">
+      {card}
+    </Link>
   );
 }
 
-function Panel({ title, dot, children }) {
+// Smaller card used for quick insights
+function InsightTile({ label, value, hint, to, icon: Icon, theme }) {
+  const t = THEMES[theme];
+
+  const tile = (
+    <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${t.icon}`}>
+        <Icon size={22} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          {label}
+        </p>
+        <p className="text-2xl font-bold tabular-nums text-slate-900">{value}</p>
+        {hint && <p className="text-xs text-slate-400">{hint}</p>}
+      </div>
+      {to && <ArrowUpRight size={18} className="text-slate-300" />}
+    </div>
+  );
+
+  if (!to) return tile;
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
-        <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />
-        {title}
-      </h3>
+    <Link to={to} className="block rounded-xl transition hover:-translate-y-0.5 hover:shadow-md">
+      {tile}
+    </Link>
+  );
+}
+
+// White box with a title, used for charts and lists
+function Panel({ title, subtitle, className = '', children }) {
+  return (
+    <div className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm ${className}`}>
+      <div className="mb-4">
+        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
+        {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+      </div>
       {children}
     </div>
   );
 }
 
+// Bar chart: one bar per month. Bar height is relative to the biggest month.
+function SignupsChart({ rows }) {
+  const max = Math.max(...rows.map((row) => row.count), 1);
+
+  return (
+    <div className="flex h-52 gap-3">
+      {rows.map((row) => (
+        <div key={row.label} className="flex flex-1 flex-col">
+          <div className="flex flex-1 flex-col items-center justify-end gap-1">
+            <span className="text-xs font-medium text-slate-600">
+              {row.count.toLocaleString('en-IN')}
+            </span>
+            <div
+              className="w-full rounded-t-md bg-linear-to-t from-indigo-500 to-violet-400"
+              style={{ height: `${(row.count / max) * 80}%`, minHeight: 4 }}
+              title={`${row.label}: ${row.count} signups`}
+            />
+          </div>
+          <span className="mt-2 text-center text-xs text-slate-400">{row.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Donut chart made with SVG circles. Each circle is one slice.
+function StatusDonut({ rows, total }) {
+  const radius = 40;
+  const circumference = 2 * Math.PI * radius;
+  let used = 0; // how much of the circle is already filled
+
+  return (
+    <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+      {/* Grey ring in the background */}
+      <circle cx="50" cy="50" r={radius} fill="none" stroke="#e2e8f0" strokeWidth="12" />
+
+      {rows.map((row) => {
+        const length = (row.count / total) * circumference;
+        const slice = (
+          <circle
+            key={row.status}
+            cx="50"
+            cy="50"
+            r={radius}
+            fill="none"
+            stroke={STATUS_COLORS[row.status] || '#94a3b8'}
+            strokeWidth="12"
+            strokeDasharray={`${length} ${circumference - length}`}
+            strokeDashoffset={-used}
+          />
+        );
+        used += length;
+        return slice;
+      })}
+    </svg>
+  );
+}
+
 function DashboardPage() {
-  const { data, isLoading, isError, error } = useQuery({
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, isFetching, isError, error } = useQuery({
     queryKey: ['stats'],
     queryFn: ({ signal }) => fetchStats(signal),
   });
@@ -112,16 +200,52 @@ function DashboardPage() {
     year: 'numeric',
   });
 
+  // Show a count as a percentage of all users, like 70.1
   const percent = (count) =>
     data ? ((count / data.total_users) * 100).toFixed(1) : '0';
 
+  // Used to draw the progress bars in "Top cities"
+  const topCities = data?.topCities ?? [];
+  const maxCityRevenue = Math.max(...topCities.map((city) => Number(city.revenue)), 1);
+
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ['stats'] });
+
   return (
     <div>
-      <div className="mb-6 rounded-2xl bg-indigo-600 bg-linear-to-r from-indigo-600 via-violet-600 to-fuchsia-500 p-6 text-white shadow-md">
-        <h2 className="text-2xl font-bold">Dashboard</h2>
-        <p className="mt-1 text-sm text-indigo-100">
-          Overview of your users and revenue · {today}
-        </p>
+      {/* Banner */}
+      <div className="relative mb-6 overflow-hidden rounded-2xl bg-slate-900 bg-linear-to-r from-slate-900 via-indigo-900 to-indigo-700 p-6 text-white shadow-md">
+        <div className="dot-pattern absolute inset-0" />
+
+        <div className="relative flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-2xl font-bold">Dashboard</h2>
+            <p className="mt-1 text-sm text-indigo-200">
+              Overview of your users and revenue · {today}
+            </p>
+          </div>
+
+          <button className="refresh-btn" onClick={refresh} disabled={isFetching}>
+            <RefreshCw size={16} className={isFetching ? 'animate-spin' : ''} />
+            Refresh
+          </button>
+        </div>
+
+        {data && (
+          <div className="relative mt-5 flex flex-wrap gap-3">
+            {[
+              `${data.total_users.toLocaleString('en-IN')} users`,
+              `${percent(data.active_users)}% active`,
+              `${formatCompactCurrency(data.total_revenue)} revenue`,
+            ].map((text) => (
+              <span
+                key={text}
+                className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-indigo-50"
+              >
+                {text}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       {isLoading && <ScooterLoader />}
@@ -129,8 +253,9 @@ function DashboardPage() {
 
       {data && (
         <>
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            <StatCard
+          {/* Row 1: main KPI cards */}
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+            <KpiCard
               label="Total users"
               value={data.total_users.toLocaleString('en-IN')}
               hint="View all users"
@@ -138,7 +263,7 @@ function DashboardPage() {
               icon={Users}
               theme="indigo"
             />
-            <StatCard
+            <KpiCard
               label="Active users"
               value={data.active_users.toLocaleString('en-IN')}
               hint={`${percent(data.active_users)}% of all users`}
@@ -146,77 +271,111 @@ function DashboardPage() {
               icon={UserCheck}
               theme="emerald"
             />
-            <StatCard
+            <KpiCard
               label="Total revenue"
               value={formatCompactCurrency(data.total_revenue)}
               hint={formatCurrency(data.total_revenue)}
               icon={IndianRupee}
               theme="violet"
             />
-            <StatCard
+            <KpiCard
               label="Avg revenue / paying user"
               value={formatCurrency(data.avg_revenue)}
+              hint="Users with revenue above 0"
               icon={TrendingUp}
               theme="sky"
             />
-            <StatCard
-              label="New this month"
-              value={data.new_this_month.toLocaleString('en-IN')}
-              icon={UserPlus}
-              theme="amber"
-            />
-            <StatCard
-              label="Never logged in"
-              value={data.never_logged_in.toLocaleString('en-IN')}
-              hint={`${percent(data.never_logged_in)}% of all users`}
-              to="/users?neverLoggedIn=true"
-              icon={UserX}
-              theme="rose"
-            />
           </div>
 
-          <div className="mt-6 grid gap-5 lg:grid-cols-2">
-            <Panel title="Users by status" dot="bg-emerald-500">
-              <div className="flex flex-col gap-4">
-                {data.byStatus.map((row) => (
-                  <div key={row.status}>
-                    <div className="mb-1 flex justify-between text-sm">
-                      <span className="font-medium capitalize">{row.status}</span>
+          {/* Row 2: signups chart and status donut */}
+          <div className="mt-6 grid gap-5 lg:grid-cols-3">
+            <Panel
+              title="New signups"
+              subtitle="Last 6 months"
+              className="lg:col-span-2"
+            >
+              <SignupsChart rows={data.signupsByMonth} />
+            </Panel>
+
+            <Panel title="Users by status" subtitle="Share of all users">
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="relative h-40 w-40 shrink-0">
+                  <StatusDonut rows={data.byStatus} total={data.total_users} />
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-2xl font-bold text-slate-900">
+                      {percent(data.active_users)}%
+                    </span>
+                    <span className="text-xs text-slate-400">active</span>
+                  </div>
+                </div>
+
+                <ul className="flex min-w-40 flex-1 flex-col gap-3">
+                  {data.byStatus.map((row) => (
+                    <li key={row.status} className="flex items-center justify-between text-sm">
+                      <span className="flex items-center gap-2 capitalize text-slate-700">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ backgroundColor: STATUS_COLORS[row.status] || '#94a3b8' }}
+                        />
+                        {row.status}
+                      </span>
                       <span className="text-slate-500">
                         {row.count.toLocaleString('en-IN')} ({percent(row.count)}%)
                       </span>
-                    </div>
-                    <div className="h-2.5 rounded-full bg-slate-100">
-                      <div
-                        className={`h-2.5 rounded-full ${STATUS_COLORS[row.status] || 'bg-slate-400'}`}
-                        style={{ width: `${percent(row.count)}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </Panel>
+          </div>
 
-            <Panel title="Top cities by revenue" dot="bg-violet-500">
-              <table>
-                <thead>
-                  <tr>
-                    <th>City</th>
-                    <th className="num">Users</th>
-                    <th className="num">Revenue</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.topCities.map((row) => (
-                    <tr key={row.city}>
-                      <td>{row.city}</td>
-                      <td className="num">{row.users.toLocaleString('en-IN')}</td>
-                      <td className="num">{formatCompactCurrency(row.revenue)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Row 3: top cities and quick insights */}
+          <div className="mt-6 grid gap-5 lg:grid-cols-3">
+            <Panel
+              title="Top cities by revenue"
+              subtitle="Top 5 cities"
+              className="lg:col-span-2"
+            >
+              <ul className="flex flex-col gap-4">
+                {topCities.map((city, index) => (
+                  <li key={city.city}>
+                    <div className="mb-1 flex items-center justify-between text-sm">
+                      <span className="font-medium text-slate-700">
+                        {index + 1}. {city.city}
+                      </span>
+                      <span className="text-slate-500">
+                        {formatCompactCurrency(city.revenue)} ·{' '}
+                        {city.users.toLocaleString('en-IN')} users
+                      </span>
+                    </div>
+                    <div className="h-2 rounded-full bg-slate-100">
+                      <div
+                        className="h-2 rounded-full bg-linear-to-r from-violet-500 to-indigo-500"
+                        style={{ width: `${(Number(city.revenue) / maxCityRevenue) * 100}%` }}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </Panel>
+
+            <div className="flex flex-col gap-5">
+              <InsightTile
+                label="New this month"
+                value={data.new_this_month.toLocaleString('en-IN')}
+                hint="Signups since the 1st"
+                icon={UserPlus}
+                theme="amber"
+              />
+              <InsightTile
+                label="Never logged in"
+                value={data.never_logged_in.toLocaleString('en-IN')}
+                hint={`${percent(data.never_logged_in)}% of all users`}
+                to="/users?neverLoggedIn=true"
+                icon={UserX}
+                theme="rose"
+              />
+            </div>
           </div>
         </>
       )}

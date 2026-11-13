@@ -49,6 +49,24 @@ function FilterBar({filters, onChange}){
         />
         Never logged in
       </label>
+            <label className="check">
+        From
+        <input
+          type="date"
+          value={filters.createdFrom}
+          onChange={(e) => onChange('createdFrom', e.target.value)}
+        />
+      </label>
+
+      <label className="check">
+        To
+        <input
+          type="date"
+          value={filters.createdTo}
+          onChange={(e) => onChange('createdTo', e.target.value)}
+        />
+      </label>
+      
     </div>
   );
 }

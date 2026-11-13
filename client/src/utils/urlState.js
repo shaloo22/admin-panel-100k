@@ -1,4 +1,5 @@
 const STATUSES = ["active", "inactive", "banned"];
+const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value || "");
 
 export function readUrlState() {
   const p = new URLSearchParams(window.location.search);
@@ -17,6 +18,9 @@ export function readUrlState() {
       minRevenue:
         Number.isFinite(minRevenue) && minRevenue > 0 ? String(minRevenue) : "",
       neverLoggedIn: p.get("neverLoggedIn") === "true",
+
+      createdFrom: isDate(p.get("createdFrom")) ? p.get("createdFrom") : "",
+      createdTo: isDate(p.get("createdTo")) ? p.get("createdTo") : "",
     },
   };
 }

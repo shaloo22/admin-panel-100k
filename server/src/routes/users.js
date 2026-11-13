@@ -1,6 +1,7 @@
 import { Router } from "express";
 import pool from "../db/pool.js";
 import { notify } from "../db/notify.js";
+import { isDate } from "../utils/isDate.js";
 
 const router = Router();
 
@@ -37,6 +38,15 @@ function buildFilters(input = {}) {
   const minRevenue = parseFloat(input.minRevenue);
   const neverLoggedIn =
     input.neverLoggedIn === true || input.neverLoggedIn === "true";
+
+  if (isDate(input.createdFrom)) {
+    params.push(input.createdFrom);
+    conditions.push(`created_at >= $${params.length}::date`);
+  }
+  if (isDate(input.createdTo)) {
+    params.push(input.createdTo);
+    conditions.push(`created_at < ($${params.length}::date + 1)`);
+  }
 
   if (search) {
     params.push(`%${escapeLike(search)}%`);

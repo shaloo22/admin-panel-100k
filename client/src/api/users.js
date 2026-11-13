@@ -58,6 +58,17 @@ export async function updateUser(id, changes) {
 
 export async function fetchStats(signal) {
   const res = await fetch(`${API_URL}/api/stats`, { signal });
-  if (!res.ok) throw new Error('Failed to fetch stats');
+  if (!res.ok) throw new Error("Failed to fetch stats");
   return res.json();
+}
+
+export async function parseFiltersWithAi(query) {
+  const res = await fetch(`${API_URL}/api/ai/parse-filters`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || "AI request failed");
+  return body.filters;
 }

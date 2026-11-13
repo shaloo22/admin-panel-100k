@@ -14,6 +14,7 @@ import FilterBar from './FilterBar';
 import FilterChips from './FilterChips';
 import EditableText from './EditableText';
 import ScooterLoader from './ScooterLoader';
+import AiFilterBox from './AiFilterBox';
 
 const COLUMNS = [
   { key: 'id', label: 'ID' },
@@ -32,6 +33,8 @@ const INITIAL_FILTERS = {
   status: '',
   minRevenue: '',
   neverLoggedIn: false,
+  createdFrom: '',
+  createdTo: '',
 };
 
 function PaginatedTable() {
@@ -131,6 +134,11 @@ function PaginatedTable() {
     setPage(1);
   };
 
+    const applyAiFilters = (aiFilters) => {
+    setFilters({ ...INITIAL_FILTERS, ...aiFilters });
+    setPage(1);
+  };
+
   const handleSort = (column) => {
     if (sort === column) {
       setOrder((o) => (o === 'asc' ? 'desc' : 'asc'));
@@ -195,6 +203,7 @@ function PaginatedTable() {
 
   return (
     <div>
+      <AiFilterBox onApply={applyAiFilters} />
       <div className="toolbar">
         <input
           className="search-input"

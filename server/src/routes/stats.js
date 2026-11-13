@@ -5,7 +5,8 @@ const router = Router();
 
 router.get("/", async (req, res) => {
   try {
-    const [summary, byStatus, topCities] = await Promise.all([
+    const [summary, byStatus, topCities, signupsByMonth] = await Promise.all([
+      // One query, many numbers: COUNT FILTER counts only the rows that match
       pool.query(`
         SELECT
           COUNT(*)::int AS total_users,
@@ -30,12 +31,29 @@ router.get("/", async (req, res) => {
         ORDER BY revenue DESC
         LIMIT 5
       `),
+      // Signups for the last 6 months. generate_series gives every month,
+      // so a month with zero signups still shows up as 0.
+      pool.query(`
+        SELECT to_char(m, 'Mon YY') AS label, COALESCE(c.count, 0)::int AS count
+        FROM generate_series(
+          date_trunc('month', NOW()) - interval '5 months',
+          date_trunc('month', NOW()),
+          interval '1 month'
+        ) AS m
+        LEFT JOIN (
+          SELECT date_trunc('month', created_at) AS month, COUNT(*) AS count
+          FROM users
+          GROUP BY 1
+        ) c ON c.month = m
+        ORDER BY m
+      `),
     ]);
 
     res.json({
       ...summary.rows[0],
       byStatus: byStatus.rows,
       topCities: topCities.rows,
+      signupsByMonth: signupsByMonth.rows,
     });
   } catch (err) {
     console.error(err);
