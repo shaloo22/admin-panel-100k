@@ -386,3 +386,90 @@ td {
 .refresh-btn:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* ----- Filter bar card ----- */
+.fb-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.fb-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Fields wrap to the next line automatically on small screens */
+.fb-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px 14px;
+  align-items: end;
+}
+
+.fb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fb-field > span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.fb-field select,
+.fb-field input {
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.fb-field select:focus,
+.fb-field input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* "Never logged in" looks like a small box that lights up when checked */
+.fb-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.fb-toggle input {
+  width: 16px;
+  height: 16px;
+  accent-color: #6366f1;
+}
+
+.fb-toggle:has(input:checked) {
+  background: #eef2ff;
+  border-color: #6366f1;
+  color: #3730a3;
+}
