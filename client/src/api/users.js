@@ -63,12 +63,27 @@ export async function fetchStats(signal) {
 }
 
 export async function parseFiltersWithAi(query) {
-  const res = await fetch(`${API_URL}/api/ai/parse-filters`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query }),
-  });
-  const body = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(body.error || "AI request failed");
-  return body.filters;
+  // Stop waiting after 25 seconds so the screen never hangs
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 25000);
+
+  try {
+    const res = await fetch(`${API_URL}/api/ai/parse-filters`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query }),
+      signal: controller.signal,
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || "AI request failed");
+    return data.filters;
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error("AI is taking too long. Please try again.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
 }
