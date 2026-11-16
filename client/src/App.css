@@ -473,3 +473,99 @@ td {
   border-color: #6366f1;
   color: #3730a3;
 }
+/* ----- Users table (virtualized infinite scroll) ----- */
+.ut-header,
+.ut-row {
+  display: grid;
+  grid-template-columns: 64px 1.3fr 2fr 1fr 110px 120px 110px 110px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.ut-header {
+  height: 42px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px 10px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+}
+
+.ut-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.ut-body {
+  position: relative;
+  height: 65vh;
+  min-height: 380px;
+  overflow: auto;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  scrollbar-gutter: stable;
+  transition: opacity 0.15s;
+}
+
+.ut-row {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 44px;
+  font-size: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ut-row:hover {
+  background: #f8fafc;
+}
+
+.ut-header > div,
+.ut-row > div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ut-empty {
+  padding: 40px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.ut-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ----- Scroll view / Page view switch ----- */
+.view-switch {
+  display: inline-flex;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.view-switch button {
+  border: none;
+  border-radius: 0;
+  background: white;
+}
+
+.view-switch button.active {
+  background: #4f46e5;
+  color: white;
+}
