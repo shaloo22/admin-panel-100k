@@ -477,7 +477,7 @@ td {
 .ut-header,
 .ut-row {
   display: grid;
-  grid-template-columns: 64px 1.3fr 2fr 1fr 110px 120px 110px 110px;
+  grid-template-columns: 40px 64px 1.3fr 2fr 1fr 130px 120px 110px 110px 48px;
   align-items: center;
   gap: 8px;
   padding: 0 12px;
@@ -568,4 +568,94 @@ td {
 .view-switch button.active {
   background: var(--color-brand-600);
   color: white;
+}
+
+/* ----- Table row states and checkboxes ----- */
+.ut-row.selected {
+  background: var(--color-brand-50);
+}
+
+.ut-row.selected:hover {
+  background: var(--color-brand-100);
+}
+
+.ut-header input[type='checkbox'],
+.ut-row input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-brand-600);
+}
+
+/* ----- Toolbar buttons with icons ----- */
+.toolbar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tool-group {
+  display: flex;
+  gap: 6px;
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.danger-text {
+  color: #be123c;
+}
+
+.icon-btn.danger {
+  color: #94a3b8;
+}
+
+.icon-btn.danger:hover {
+  background: #fee2e2;
+  color: #be123c;
+}
+
+/* ----- Toast (message at the bottom left) ----- */
+.toast {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 440px;
+  padding: 10px 14px;
+  background: var(--color-sidebar);
+  color: white;
+  font-size: 14px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+}
+
+.toast-error {
+  background: #9f1239;
+}
+
+.toast-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: var(--color-accent-300);
+  padding: 3px 10px;
+  font-weight: 600;
+}
+
+.toast-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.toast-close {
+  display: flex;
+  padding: 2px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
 }

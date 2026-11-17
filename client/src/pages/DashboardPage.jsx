@@ -54,25 +54,27 @@ const STATUS_COLORS = {
   inactive: '#f59e0b',
   banned: '#f43f5e',
 };
-
-// Big KPI card: icon, label, number and a small hint
 function KpiCard({ label, value, hint, to, icon: Icon, theme }) {
-  const t = THEMES[theme];
+  const t = THEMES[theme];  
 
   const card = (
-    <div className="relative h-full overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      {/* Soft circle in the corner, just for decoration */}
-      <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full opacity-60 ${t.soft}`} />
+    <div className="flex h-full items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <div
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${t.icon}`}
+      >
+        <Icon size={20} strokeWidth={1.75} />
+      </div>
 
-      <div className="relative">
-        <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${t.icon}`}>
-          <Icon size={20} />
-        </div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+      <div className="min-w-0">
+        <p className="truncate text-[11px] font-semibold uppercase tracking-wide text-slate-500">
           {label}
         </p>
-        <p className="mt-1 text-3xl font-bold tabular-nums text-slate-900">{value}</p>
-        {hint && <p className={`mt-2 text-xs font-medium ${t.text}`}>{hint}</p>}
+        <p className="truncate text-xl font-bold leading-tight tabular-nums text-slate-900">
+          {value}
+        </p>
+        {hint && (
+          <p className={`truncate text-[11px] font-medium ${t.text}`}>{hint}</p>
+        )}
       </div>
     </div>
   );
@@ -80,7 +82,10 @@ function KpiCard({ label, value, hint, to, icon: Icon, theme }) {
   // If the card has a link, wrap it so the user can click it
   if (!to) return card;
   return (
-    <Link to={to} className="block h-full rounded-xl transition hover:-translate-y-0.5 hover:shadow-md">
+    <Link
+      to={to}
+      className="block h-full rounded-xl transition hover:-translate-y-0.5 hover:shadow-md"
+    >
       {card}
     </Link>
   );
@@ -253,8 +258,8 @@ function DashboardPage() {
 
       {data && (
         <>
-          {/* Row 1: main KPI cards */}
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                    {/* Row 1: small KPI cards in one line */}
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <KpiCard
               label="Total users"
               value={data.total_users.toLocaleString('en-IN')}
@@ -266,7 +271,7 @@ function DashboardPage() {
             <KpiCard
               label="Active users"
               value={data.active_users.toLocaleString('en-IN')}
-              hint={`${percent(data.active_users)}% of all users`}
+              hint={`${percent(data.active_users)}% of total`}
               to="/users?status=active"
               icon={UserCheck}
               theme="emerald"
@@ -274,21 +279,21 @@ function DashboardPage() {
             <KpiCard
               label="Total revenue"
               value={formatCompactCurrency(data.total_revenue)}
-              hint={formatCurrency(data.total_revenue)}
+              hint="Lifetime revenue"
               icon={IndianRupee}
               theme="violet"
             />
             <KpiCard
-              label="Avg revenue / paying user"
+              label="Avg revenue"
               value={formatCurrency(data.avg_revenue)}
-              hint="Users with revenue above 0"
+              hint="Per paying user"
               icon={TrendingUp}
               theme="sky"
             />
           </div>
 
           {/* Row 2: signups chart and status donut */}
-          <div className="mt-6 grid gap-5 lg:grid-cols-3">
+          <div className="mt-5 grid gap-4 lg:grid-cols-3">
             <Panel
               title="New signups"
               subtitle="Last 6 months"
@@ -330,7 +335,7 @@ function DashboardPage() {
           </div>
 
           {/* Row 3: top cities and quick insights */}
-          <div className="mt-6 grid gap-5 lg:grid-cols-3">
+          <div className="mt-5 grid gap-4 lg:grid-cols-3">
             <Panel
               title="Top cities by revenue"
               subtitle="Top 5 cities"
@@ -359,7 +364,7 @@ function DashboardPage() {
               </ul>
             </Panel>
 
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-4">
               <InsightTile
                 label="New this month"
                 value={data.new_this_month.toLocaleString('en-IN')}
