@@ -1,5 +1,45 @@
 @import "tailwindcss";
 
+/* ----- Color palette: change colors here and the whole app follows ----- */
+@theme {
+  /* Brand color: deep teal */
+  --color-brand-50: #effaf8;
+  --color-brand-100: #d3f3ee;
+  --color-brand-200: #a8e6dd;
+  --color-brand-300: #72d2c7;
+  --color-brand-400: #3db9ae;
+  --color-brand-500: #1f9d94;
+  --color-brand-600: #158079;
+  --color-brand-700: #12665f;
+  --color-brand-800: #11514d;
+  --color-brand-900: #0f4340;
+  --color-brand-950: #062826;
+
+  /* Accent color: warm amber */
+  --color-accent-50: #fff8eb;
+  --color-accent-100: #feefc7;
+  --color-accent-200: #fcdd8c;
+  --color-accent-300: #fac551;
+  --color-accent-400: #f7ac28;
+  --color-accent-500: #ee9112;
+  --color-accent-600: #d26e0b;
+  --color-accent-700: #ae4e0d;
+  --color-accent-800: #8c3d12;
+  --color-accent-900: #733312;
+
+  /* Layout colors */
+  --color-sidebar: #0a2f2d;
+  --color-sidebar-hover: #12403d;
+  --color-sidebar-active: #1a524e;
+  --color-canvas: #f6f8f7;
+}
+
+body {
+  margin: 0;
+  background: var(--color-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
 button {
   border: 1px solid #cbd5e1;
   background: white;

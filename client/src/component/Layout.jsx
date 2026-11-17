@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet } from 'react-router';
-import { LayoutDashboard, Users, Gauge, Menu } from 'lucide-react';
+import { Gauge, LayoutDashboard, Menu, Users } from 'lucide-react';
 import NotificationBell from './NotificationBell';
+
+// Change the app name here, it shows in the sidebar
+const APP_NAME = 'UserDesk';
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -14,7 +17,7 @@ function readCollapsed() {
     const saved = localStorage.getItem('sidebarCollapsed');
     if (saved !== null) return saved === 'true';
   } catch {
-    // storage band ho to default chalega
+    // storage can be blocked, then we use the default below
   }
   return window.innerWidth < 1024;
 }
@@ -22,6 +25,7 @@ function readCollapsed() {
 function Layout() {
   const [collapsed, setCollapsed] = useState(readCollapsed);
 
+  // Remember the sidebar choice after refresh
   useEffect(() => {
     try {
       localStorage.setItem('sidebarCollapsed', String(collapsed));
@@ -31,16 +35,30 @@ function Layout() {
   }, [collapsed]);
 
   return (
-    <div className="flex min-h-screen bg-slate-50 text-slate-800">
+    <div className="flex min-h-screen bg-canvas text-slate-800">
       <aside
-        className={`flex shrink-0 flex-col overflow-hidden bg-slate-900 text-slate-200 transition-[width] duration-200 ${
+        className={`flex shrink-0 flex-col overflow-hidden bg-sidebar text-brand-100 transition-[width] duration-200 ${
           collapsed ? 'w-16' : 'w-60'
         }`}
       >
-        <div className="flex h-14 items-center whitespace-nowrap px-5 text-lg font-bold text-white">
-          {collapsed ? 'A' : 'AdminPanel'}
+        {/* Logo */}
+        <div className="flex h-14 items-center gap-3 whitespace-nowrap border-b border-white/10 px-4">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-400 text-sm font-extrabold text-sidebar">
+            {APP_NAME[0]}
+          </div>
+          <span className="text-base font-semibold tracking-wide text-white">
+            {APP_NAME}
+          </span>
         </div>
-        <nav className="flex flex-col gap-1 px-3">
+
+        {/* Menu */}
+        <nav className="flex flex-col gap-1 px-3 pt-4">
+          {!collapsed && (
+            <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-widest text-brand-300/60">
+              Menu
+            </p>
+          )}
+
           {NAV.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
@@ -48,12 +66,14 @@ function Layout() {
               end={end}
               title={label}
               className={({ isActive }) =>
-                `flex items-center gap-3 overflow-hidden whitespace-nowrap rounded-md px-3 py-2 text-sm transition-colors ${
-                  isActive ? 'bg-slate-700 text-white' : 'hover:bg-slate-800'
+                `flex items-center gap-3 overflow-hidden whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-sidebar-active text-white shadow-[inset_3px_0_0_var(--color-accent-400)]'
+                    : 'text-brand-100/80 hover:bg-sidebar-hover hover:text-white'
                 }`
               }
             >
-              <Icon size={18} className="shrink-0" />
+              <Icon size={20} strokeWidth={1.75} className="shrink-0" />
               {!collapsed && label}
             </NavLink>
           ))}
@@ -61,6 +81,7 @@ function Layout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
+        {/* Top bar */}
         <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4">
           <div className="flex items-center gap-3">
             <button
@@ -69,15 +90,16 @@ function Layout() {
               aria-label="Toggle sidebar"
               title="Toggle sidebar"
             >
-              <Menu size={20} />
+              <Menu size={20} strokeWidth={1.75} />
             </button>
             <span className="text-sm font-semibold text-slate-600">
               Admin Panel
             </span>
           </div>
-                    <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-3">
             <NotificationBell />
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-white">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-brand-500 to-brand-700 text-sm font-semibold text-white">
               A
             </div>
           </div>

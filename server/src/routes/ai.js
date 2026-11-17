@@ -44,7 +44,7 @@ async function getCities() {
   if (Date.now() - cityCache.savedAt < CACHE_TTL) return cityCache.cities;
 
   const result = await pool.query(
-    "SELECT DISTINCT city FROM users WHERE city IS NOT NULL ORDER BY city",
+    "SELECT DISTINCT city FROM users WHERE city IS NOT NULL AND deleted_at IS NULL ORDER BY city",
   );
   cityCache = { cities: result.rows.map((r) => r.city), savedAt: Date.now() };
   return cityCache.cities;

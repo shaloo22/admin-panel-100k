@@ -33,15 +33,15 @@ function AiFilterBox({ onApply }) {
   };
 
   return (
-    <div className="mb-4 rounded-xl border border-indigo-100 bg-indigo-50/60 p-3">
+    <div className="mb-4 rounded-xl border border-brand-100 bg-brand-50/60 p-3">
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Sparkles
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-500"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-500"
           />
           <input
-            className="w-full rounded-md border border-indigo-200 bg-white py-2 pl-9 pr-3 text-sm"
+            className="w-full rounded-md border border-brand-200 bg-white py-2 pl-9 pr-3 text-sm"
             placeholder="Ask in plain language, e.g. active users from Delhi who never logged in"
             value={text}
             maxLength={300}

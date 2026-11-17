@@ -108,7 +108,7 @@ function NotificationBell() {
                       </span>
                     </span>
                     {!n.is_read && (
-                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-indigo-500" />
+                      <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-brand-500" />
                     )}
                   </button>
                 </li>

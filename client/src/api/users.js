@@ -87,3 +87,24 @@ export async function parseFiltersWithAi(query) {
     clearTimeout(timer);
   }
 }
+
+// Small helper used by delete and restore (both send a list of ids)
+async function postIds(path, ids, fallbackMessage) {
+  const res = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || fallbackMessage);
+  }
+  return res.json();
+}
+
+export const deleteUsers = (ids) =>
+  postIds('/api/users/delete', ids, 'Delete failed');
+
+export const restoreUsers = (ids) =>
+  postIds('/api/users/restore', ids, 'Restore failed');

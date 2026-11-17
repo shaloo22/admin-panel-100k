@@ -16,17 +16,19 @@ router.get("/", async (req, res) => {
           COALESCE(SUM(revenue), 0) AS total_revenue,
           COALESCE(AVG(revenue) FILTER (WHERE revenue > 0), 0) AS avg_revenue
         FROM users
+        WHERE deleted_at IS NULL
       `),
       pool.query(`
         SELECT status, COUNT(*)::int AS count
         FROM users
+        WHERE deleted_at IS NULL
         GROUP BY status
         ORDER BY count DESC
       `),
       pool.query(`
         SELECT city, COUNT(*)::int AS users, COALESCE(SUM(revenue), 0) AS revenue
         FROM users
-        WHERE city IS NOT NULL
+        WHERE city IS NOT NULL AND deleted_at IS NULL
         GROUP BY city
         ORDER BY revenue DESC
         LIMIT 5
@@ -43,6 +45,7 @@ router.get("/", async (req, res) => {
         LEFT JOIN (
           SELECT date_trunc('month', created_at) AS month, COUNT(*) AS count
           FROM users
+          WHERE deleted_at IS NULL
           GROUP BY 1
         ) c ON c.month = m
         ORDER BY m

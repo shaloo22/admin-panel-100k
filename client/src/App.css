@@ -41,7 +41,7 @@ th {
 }
 
 .tabs button.active {
-  background: #333;
+  background: var(--color-brand-700);
   color: white;
 }
 
@@ -165,8 +165,8 @@ th {
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background: #e8f0fe;
-  color: #1a3d8f;
+  background: var(--color-brand-100);
+  color: var(--color-brand-700);
   border-radius: 999px;
   font-size: 13px;
 }
@@ -182,7 +182,7 @@ th {
 .link-btn {
   border: none;
   background: transparent;
-  color: #1a3d8f;
+  color: var(--color-brand-700);
   cursor: pointer;
   text-decoration: underline;
 }
@@ -207,7 +207,7 @@ th {
 }
 
 tr.selected-row {
-  background: #f0f6ff;
+  background: var(--color-brand-50);
 }
 .editable {
   cursor: text;
@@ -222,7 +222,7 @@ tr.selected-row {
   width: 100%;
   box-sizing: border-box;
   padding: 4px 6px;
-  border: 1px solid #4c8bf5;
+  border: 1px solid var(--color-brand-500);
   border-radius: 4px;
 }
 
@@ -275,7 +275,7 @@ td {
   width: 260px;
   height: 52px;
   overflow: hidden;
-  border-bottom: 2px dashed #c7d2fe;
+  border-bottom: 2px dashed var(--color-brand-200);
 }
 
 .scooter {
@@ -337,11 +337,11 @@ td {
 }
 
 .notif-item.unread {
-  background: #eef2ff;
+  background: var(--color-brand-50);
 }
 
 .notif-item.unread:hover {
-  background: #e0e7ff;
+  background: var(--color-brand-100);
 }
 .filter-bar input[type='date'] {
   padding: 8px 10px;
@@ -350,23 +350,23 @@ td {
 }
 
 .ai-btn {
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  background: linear-gradient(90deg, var(--color-brand-500), var(--color-brand-400));
   color: white;
   border: none;
   font-weight: 600;
 }
 
 .example-chip {
-  border: 1px solid #c7d2fe;
+  border: 1px solid var(--color-brand-200);
   background: white;
-  color: #4338ca;
+  color: var(--color-brand-700);
   border-radius: 999px;
   padding: 3px 10px;
   font-size: 12px;
 }
 
 .example-chip:hover {
-  background: #eef2ff;
+  background: var(--color-brand-50);
 }
 /* Dot pattern used on top of the dashboard banner */
 .dot-pattern {
@@ -443,8 +443,8 @@ td {
 .fb-field select:focus,
 .fb-field input:focus {
   outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border-color: var(--color-brand-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-500) 18%, transparent);
 }
 
 /* "Never logged in" looks like a small box that lights up when checked */
@@ -465,13 +465,13 @@ td {
 .fb-toggle input {
   width: 16px;
   height: 16px;
-  accent-color: #6366f1;
+  accent-color: var(--color-brand-500);
 }
 
 .fb-toggle:has(input:checked) {
-  background: #eef2ff;
-  border-color: #6366f1;
-  color: #3730a3;
+  background: var(--color-brand-50);
+  border-color: var(--color-brand-500);
+  color: var(--color-brand-800);
 }
 /* ----- Users table (virtualized infinite scroll) ----- */
 .ut-header,
@@ -566,6 +566,6 @@ td {
 }
 
 .view-switch button.active {
-  background: #4f46e5;
+  background: var(--color-brand-600);
   color: white;
 }

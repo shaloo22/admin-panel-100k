@@ -30,7 +30,7 @@ function parseSort(input = {}) {
 
 function buildFilters(input = {}) {
   const params = [];
-  const conditions = [];
+  const conditions = ["deleted_at IS NULL"]; // deleted users are never shown
 
   const search = String(input.search || "").trim();
   const city = String(input.city || "").trim();
@@ -123,7 +123,7 @@ router.get("/", async (req, res) => {
 router.get("/cities", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT DISTINCT city FROM users WHERE city IS NOT NULL ORDER BY city",
+      "SELECT DISTINCT city FROM users WHERE city IS NOT NULL AND deleted_at IS NULL ORDER BY city",
     );
     res.json(result.rows.map((row) => row.city));
   } catch (err) {
@@ -137,7 +137,7 @@ router.get("/all", async (req, res) => {
   try {
     const count = Math.min(parseInt(req.query.count) || 20000, 50000);
     const result = await pool.query(
-      "SELECT * FROM users ORDER BY id LIMIT $1",
+      "SELECT * FROM users WHERE deleted_at IS NULL ORDER BY id LIMIT $1",
       [count],
     );
     res.json({ data: result.rows, count: result.rows.length });
@@ -222,7 +222,7 @@ router.patch("/:id", async (req, res) => {
 
     params.push(id);
     const result = await pool.query(
-      `UPDATE users SET ${sets.join(", ")} WHERE id = $${params.length} RETURNING *`,
+      `UPDATE users SET ${sets.join(", ")} WHERE id = $${params.length} AND deleted_at IS NULL RETURNING *`,
       params,
     );
 
@@ -243,6 +243,63 @@ router.patch("/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
+const MAX_BULK = 1000;
+
+// Keep only real positive whole numbers from the request
+function cleanIds(input) {
+  if (!Array.isArray(input)) return [];
+  return input
+    .filter((id) => Number.isInteger(id) && id > 0)
+    .slice(0, MAX_BULK);
+}
+
+// Soft delete: the row stays in the table, we only mark it as deleted.
+// This is what makes "Undo" possible.
+router.post("/delete", async (req, res) => {
+  try {
+    const ids = cleanIds(req.body?.ids);
+    if (ids.length === 0) {
+      return res.status(400).json({ error: "No valid ids" });
+    }
+
+    const result = await pool.query(
+      "UPDATE users SET deleted_at = NOW() WHERE id = ANY($1::int[]) AND deleted_at IS NULL",
+      [ids],
+    );
+
+    notify("user_deleted", `${result.rowCount} user(s) deleted`).catch((e) =>
+      console.error("notify failed:", e.message),
+    );
+    res.json({ deleted: result.rowCount });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete users" });
+  }
+});
+
+// Restore is the "undo" of delete
+router.post("/restore", async (req, res) => {
+  try {
+    const ids = cleanIds(req.body?.ids);
+    if (ids.length === 0) {
+      return res.status(400).json({ error: "No valid ids" });
+    }
+
+    const result = await pool.query(
+      "UPDATE users SET deleted_at = NULL WHERE id = ANY($1::int[]) AND deleted_at IS NOT NULL",
+      [ids],
+    );
+
+    notify("user_restored", `${result.rowCount} user(s) restored`).catch((e) =>
+      console.error("notify failed:", e.message),
+    );
+    res.json({ restored: result.rowCount });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to restore users" });
   }
 });
 

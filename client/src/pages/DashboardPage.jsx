@@ -17,9 +17,9 @@ import ScooterLoader from '../component/ScooterLoader';
 // Colors for each card theme (full class names, so Tailwind can find them)
 const THEMES = {
   indigo: {
-    soft: 'bg-indigo-100',
-    icon: 'bg-indigo-100 text-indigo-600',
-    text: 'text-indigo-600',
+    soft: 'bg-brand-100',
+    icon: 'bg-brand-100 text-brand-600',
+    text: 'text-brand-600',
   },
   emerald: {
     soft: 'bg-emerald-100',
@@ -27,9 +27,9 @@ const THEMES = {
     text: 'text-emerald-600',
   },
   violet: {
-    soft: 'bg-violet-100',
-    icon: 'bg-violet-100 text-violet-600',
-    text: 'text-violet-600',
+    soft: 'bg-accent-100',
+    icon: 'bg-accent-100 text-accent-600',
+    text: 'text-accent-600',
   },
   sky: {
     soft: 'bg-sky-100',
@@ -140,7 +140,7 @@ function SignupsChart({ rows }) {
               {row.count.toLocaleString('en-IN')}
             </span>
             <div
-              className="w-full rounded-t-md bg-linear-to-t from-indigo-500 to-violet-400"
+              className="w-full rounded-t-md bg-linear-to-t from-brand-600 to-brand-300"
               style={{ height: `${(row.count / max) * 80}%`, minHeight: 4 }}
               title={`${row.label}: ${row.count} signups`}
             />
@@ -213,13 +213,13 @@ function DashboardPage() {
   return (
     <div>
       {/* Banner */}
-      <div className="relative mb-6 overflow-hidden rounded-2xl bg-slate-900 bg-linear-to-r from-slate-900 via-indigo-900 to-indigo-700 p-6 text-white shadow-md">
+      <div className="relative mb-6 overflow-hidden rounded-2xl bg-sidebar bg-linear-to-r from-sidebar via-brand-900 to-brand-600 p-6 text-white shadow-md">
         <div className="dot-pattern absolute inset-0" />
 
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="text-2xl font-bold">Dashboard</h2>
-            <p className="mt-1 text-sm text-indigo-200">
+            <p className="mt-1 text-sm text-brand-200">
               Overview of your users and revenue · {today}
             </p>
           </div>
@@ -239,7 +239,7 @@ function DashboardPage() {
             ].map((text) => (
               <span
                 key={text}
-                className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-indigo-50"
+                className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-brand-50"
               >
                 {text}
               </span>
@@ -350,7 +350,7 @@ function DashboardPage() {
                     </div>
                     <div className="h-2 rounded-full bg-slate-100">
                       <div
-                        className="h-2 rounded-full bg-linear-to-r from-violet-500 to-indigo-500"
+                        className="h-2 rounded-full bg-linear-to-r from-brand-400 to-brand-600"
                         style={{ width: `${(Number(city.revenue) / maxCityRevenue) * 100}%` }}
                       />
                     </div>
