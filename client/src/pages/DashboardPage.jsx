@@ -96,24 +96,29 @@ function InsightTile({ label, value, hint, to, icon: Icon, theme }) {
   const t = THEMES[theme];
 
   const tile = (
-    <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${t.icon}`}>
-        <Icon size={22} />
+    <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${t.icon}`}>
+        <Icon size={17} />
       </div>
+
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <p className="truncate text-[10px] font-semibold uppercase tracking-wide text-slate-500">
           {label}
         </p>
-        <p className="text-2xl font-bold tabular-nums text-slate-900">{value}</p>
-        {hint && <p className="text-xs text-slate-400">{hint}</p>}
+        <p className="text-lg font-bold leading-tight tabular-nums text-slate-900">
+          {value}
+        </p>
+        {hint && <p className="truncate text-[10px] text-slate-400">{hint}</p>}
       </div>
-      {to && <ArrowUpRight size={18} className="text-slate-300" />}
+
+      {to && <ArrowUpRight size={15} className="text-slate-300" />}
     </div>
   );
 
   if (!to) return tile;
+
   return (
-    <Link to={to} className="block rounded-xl transition hover:-translate-y-0.5 hover:shadow-md">
+    <Link to={to} className="block rounded-lg transition hover:shadow-md">
       {tile}
     </Link>
   );
@@ -122,10 +127,14 @@ function InsightTile({ label, value, hint, to, icon: Icon, theme }) {
 // White box with a title, used for charts and lists
 function Panel({ title, subtitle, className = '', children }) {
   return (
-    <div className={`rounded-xl border border-slate-200 bg-white p-5 shadow-sm ${className}`}>
-      <div className="mb-4">
-        <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-        {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+    <div className={`rounded-lg border border-slate-200 bg-white p-4 shadow-sm ${className}`}>
+      <div className="mb-3">
+        <h3 className="text-[13px] font-semibold text-slate-800">
+          {title}
+        </h3>
+        {subtitle && (
+          <p className="text-[11px] text-slate-400">{subtitle}</p>
+        )}
       </div>
       {children}
     </div>
@@ -137,7 +146,7 @@ function SignupsChart({ rows }) {
   const max = Math.max(...rows.map((row) => row.count), 1);
 
   return (
-    <div className="flex h-52 gap-3">
+    <div className="flex h-40 gap-2">
       {rows.map((row) => (
         <div key={row.label} className="flex flex-1 flex-col">
           <div className="flex flex-1 flex-col items-center justify-end gap-1">
@@ -304,17 +313,17 @@ function DashboardPage() {
 
             <Panel title="Users by status" subtitle="Share of all users">
               <div className="flex flex-wrap items-center gap-6">
-                <div className="relative h-40 w-40 shrink-0">
+                <div className="relative h-28 w-28 shrink-0">
                   <StatusDonut rows={data.byStatus} total={data.total_users} />
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-2xl font-bold text-slate-900">
+                    <span className="text-xl font-bold text-slate-900">
                       {percent(data.active_users)}%
-                    </span>
+                    </span> 
                     <span className="text-xs text-slate-400">active</span>
                   </div>
                 </div>
 
-                <ul className="flex min-w-40 flex-1 flex-col gap-3">
+                <ul className="flex min-w-40 flex-1 flex-col gap-2">
                   {data.byStatus.map((row) => (
                     <li key={row.status} className="flex items-center justify-between text-sm">
                       <span className="flex items-center gap-2 capitalize text-slate-700">

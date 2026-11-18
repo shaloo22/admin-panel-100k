@@ -1,13 +1,19 @@
+
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router';
-import { Gauge, LayoutDashboard, Menu, Users } from 'lucide-react';
+import { NavLink, Outlet, useNavigate } from 'react-router';
+import {
+  Gauge,
+  LayoutDashboard,
+  Menu,
+  Users,
+  LogOut,
+} from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
-// Change the app name here, it shows in the sidebar
 const APP_NAME = 'UserDesk';
 
 const NAV = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/users', label: 'Users', icon: Users },
   { to: '/lab', label: 'Performance Lab', icon: Gauge },
 ];
@@ -16,23 +22,23 @@ function readCollapsed() {
   try {
     const saved = localStorage.getItem('sidebarCollapsed');
     if (saved !== null) return saved === 'true';
-  } catch {
-    // storage can be blocked, then we use the default below
-  }
+  } catch {}
   return window.innerWidth < 1024;
 }
 
 function Layout() {
   const [collapsed, setCollapsed] = useState(readCollapsed);
+  const navigate = useNavigate();
 
-  // Remember the sidebar choice after refresh
   useEffect(() => {
     try {
       localStorage.setItem('sidebarCollapsed', String(collapsed));
-    } catch {
-      // ignore
-    }
+    } catch {}
   }, [collapsed]);
+
+  const handleLogout = () => {
+    navigate('/login');
+  };
 
   return (
     <div className="flex min-h-screen bg-canvas text-slate-800">
@@ -41,7 +47,6 @@ function Layout() {
           collapsed ? 'w-16' : 'w-60'
         }`}
       >
-        {/* Logo */}
         <div className="flex h-14 items-center gap-3 whitespace-nowrap border-b border-white/10 px-4">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-400 text-sm font-extrabold text-sidebar">
             {APP_NAME[0]}
@@ -51,8 +56,7 @@ function Layout() {
           </span>
         </div>
 
-        {/* Menu */}
-        <nav className="flex flex-col gap-1 px-3 pt-4">
+        <nav className="flex flex-1 flex-col gap-1 px-3 pt-4">
           {!collapsed && (
             <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-widest text-brand-300/60">
               Menu
@@ -77,11 +81,19 @@ function Layout() {
               {!collapsed && label}
             </NavLink>
           ))}
+
+          <button
+            onClick={handleLogout}
+            title="Logout"
+            className="mt-auto mb-4 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-brand-100/80 transition-colors hover:bg-sidebar-hover hover:text-white"
+          >
+            <LogOut size={20} className="shrink-0" />
+            {!collapsed && 'Logout'}
+          </button>
         </nav>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* Top bar */}
         <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4">
           <div className="flex items-center gap-3">
             <button
