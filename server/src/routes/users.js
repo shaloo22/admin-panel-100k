@@ -135,7 +135,7 @@ router.get("/cities", async (req, res) => {
 // TEMPORARY
 router.get("/all", async (req, res) => {
   try {
-    const count = Math.min(parseInt(req.query.count) || 20000, 50000);
+    const count = Math.min(parseInt(req.query.count) || 20000, 20000);
     const result = await pool.query(
       "SELECT * FROM users WHERE deleted_at IS NULL ORDER BY id LIMIT $1",
       [count],

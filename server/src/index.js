@@ -10,7 +10,16 @@ import aiRouter from "./routes/ai.js";
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-app.use(cors());
+// Render runs our app behind a proxy, so trust it to read the real visitor IP
+// (the AI rate limit needs this)
+app.set("trust proxy", 1);
+
+// Only our own website may call this API (CLIENT_URL is set on the server)
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",") : true,
+  }),
+);
 app.use(express.json());
 
 app.get("/", (req, res) => {
