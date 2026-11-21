@@ -28,7 +28,7 @@ function UsersPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white p-4">
+      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white p-2 sm:p-4">
         {view === 'scroll' ? <UsersTable /> : <PaginatedTable />}
       </div>
     </div>

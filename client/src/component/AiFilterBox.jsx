@@ -34,7 +34,7 @@ function AiFilterBox({ onApply }) {
 
   return (
     <div className="mb-4 rounded-xl border border-brand-100 bg-brand-50/60 p-3">
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative flex-1">
           <Sparkles
             size={16}

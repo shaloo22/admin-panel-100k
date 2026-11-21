@@ -470,7 +470,8 @@ function UsersTable() {
       )}
 
       {isError && <p className="error">{error.message}</p>}
-
+        <div className="ut-scroll">
+        <div className="ut-inner">
       {/* Header row */}
       <div className="ut-header">
         <div>
@@ -563,6 +564,8 @@ function UsersTable() {
             );
           })}
         </div>
+      </div>
+         </div>
       </div>
 
       <div className="ut-footer">

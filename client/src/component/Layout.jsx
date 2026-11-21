@@ -1,19 +1,13 @@
-
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router';
-import {
-  Gauge,
-  LayoutDashboard,
-  Menu,
-  Users,
-  LogOut,
-} from 'lucide-react';
+import { NavLink, Outlet } from 'react-router';
+import { Gauge, LayoutDashboard, Menu, Users } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
+// Change the app name here, it shows in the sidebar
 const APP_NAME = 'UserDesk';
 
 const NAV = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, end: true },
+  { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/users', label: 'Users', icon: Users },
   { to: '/lab', label: 'Performance Lab', icon: Gauge },
 ];
@@ -22,46 +16,73 @@ function readCollapsed() {
   try {
     const saved = localStorage.getItem('sidebarCollapsed');
     if (saved !== null) return saved === 'true';
-  } catch {}
+  } catch {
+    // storage can be blocked, then we use the default below
+  }
   return window.innerWidth < 1024;
 }
 
 function Layout() {
+  // collapsed = small icon sidebar on desktop
+  // mobileOpen = slide-in menu on a phone
   const [collapsed, setCollapsed] = useState(readCollapsed);
-  const navigate = useNavigate();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Remember the desktop sidebar choice after refresh
   useEffect(() => {
     try {
       localStorage.setItem('sidebarCollapsed', String(collapsed));
-    } catch {}
+    } catch {
+      // ignore
+    }
   }, [collapsed]);
 
-  const handleLogout = () => {
-    navigate('/login');
+  const toggleMenu = () => {
+    // Desktop: shrink to icons. Phone: slide the menu in or out.
+    if (window.matchMedia('(min-width: 768px)').matches) {
+      setCollapsed((c) => !c);
+    } else {
+      setMobileOpen((o) => !o);
+    }
   };
+
+  // Hide the text only on desktop when the sidebar is collapsed
+  const hideWhenCollapsed = collapsed ? 'md:hidden' : '';
 
   return (
     <div className="flex min-h-screen bg-canvas text-slate-800">
+      {/* Dark background behind the menu on a phone */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
       <aside
-        className={`flex shrink-0 flex-col overflow-hidden bg-sidebar text-brand-100 transition-[width] duration-200 ${
-          collapsed ? 'w-16' : 'w-60'
-        }`}
+        className={`fixed inset-y-0 left-0 z-40 flex w-60 shrink-0 flex-col overflow-hidden bg-sidebar text-brand-100 transition-all duration-200 md:static md:translate-x-0 ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        } ${collapsed ? 'md:w-16' : 'md:w-60'}`}
       >
+        {/* Logo */}
         <div className="flex h-14 items-center gap-3 whitespace-nowrap border-b border-white/10 px-4">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-400 text-sm font-extrabold text-sidebar">
             {APP_NAME[0]}
           </div>
-          <span className="text-base font-semibold tracking-wide text-white">
+          <span
+            className={`text-base font-semibold tracking-wide text-white ${hideWhenCollapsed}`}
+          >
             {APP_NAME}
           </span>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1 px-3 pt-4">
-          {!collapsed && (
-            <p className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-widest text-brand-300/60">
-              Menu
-            </p>
-          )}
+        {/* Menu */}
+        <nav className="flex flex-col gap-1 px-3 pt-4">
+          <p
+            className={`px-3 pb-1 text-[11px] font-semibold uppercase tracking-widest text-brand-300/60 ${hideWhenCollapsed}`}
+          >
+            Menu
+          </p>
 
           {NAV.map(({ to, label, icon: Icon, end }) => (
             <NavLink
@@ -69,6 +90,7 @@ function Layout() {
               to={to}
               end={end}
               title={label}
+              onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
                 `flex items-center gap-3 overflow-hidden whitespace-nowrap rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   isActive
@@ -78,29 +100,21 @@ function Layout() {
               }
             >
               <Icon size={20} strokeWidth={1.75} className="shrink-0" />
-              {!collapsed && label}
+              <span className={hideWhenCollapsed}>{label}</span>
             </NavLink>
           ))}
-
-          <button
-            onClick={handleLogout}
-            title="Logout"
-            className="mt-auto mb-4 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-brand-100/80 transition-colors hover:bg-sidebar-hover hover:text-white"
-          >
-            <LogOut size={20} className="shrink-0" />
-            {!collapsed && 'Logout'}
-          </button>
         </nav>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4">
+        {/* Top bar */}
+        <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-3 sm:px-4">
           <div className="flex items-center gap-3">
             <button
               className="icon-btn"
-              onClick={() => setCollapsed((c) => !c)}
-              aria-label="Toggle sidebar"
-              title="Toggle sidebar"
+              onClick={toggleMenu}
+              aria-label="Toggle menu"
+              title="Toggle menu"
             >
               <Menu size={20} strokeWidth={1.75} />
             </button>
@@ -117,7 +131,7 @@ function Layout() {
           </div>
         </header>
 
-        <main className="min-w-0 flex-1 p-6">
+        <main className="min-w-0 flex-1 p-3 sm:p-6">
           <Outlet />
         </main>
       </div>

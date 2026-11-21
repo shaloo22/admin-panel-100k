@@ -659,3 +659,36 @@ td {
   border: none;
   color: rgba(255, 255, 255, 0.7);
 }
+/* ----- Phone friendly ----- */
+.ut-scroll {
+  overflow-x: auto;
+}
+
+.ut-inner {
+  min-width: 980px;
+}
+
+.ut-body {
+  height: 65dvh;
+}
+
+.toolbar {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .search-input {
+    width: 100%;
+  }
+
+  .share-btn {
+    margin-left: 0;
+  }
+
+  .toast {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    max-width: none;
+  }
+}
