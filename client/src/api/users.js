@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:4000";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
 export async function fetchUsers({
   page = 1,
@@ -91,8 +91,8 @@ export async function parseFiltersWithAi(query) {
 // Small helper used by delete and restore (both send a list of ids)
 async function postIds(path, ids, fallbackMessage) {
   const res = await fetch(`${API_URL}${path}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ids }),
   });
 
@@ -104,7 +104,7 @@ async function postIds(path, ids, fallbackMessage) {
 }
 
 export const deleteUsers = (ids) =>
-  postIds('/api/users/delete', ids, 'Delete failed');
+  postIds("/api/users/delete", ids, "Delete failed");
 
 export const restoreUsers = (ids) =>
-  postIds('/api/users/restore', ids, 'Restore failed');
+  postIds("/api/users/restore", ids, "Restore failed");

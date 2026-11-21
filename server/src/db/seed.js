@@ -3,7 +3,7 @@ import pool from "./pool.js";
 
 const TOTAL = 100000;
 const BATCH_SIZE = 1000;
-const COLUMNS = 8;
+const COLUMNS = 7;
 
 const CITIES = [
   "Delhi",
@@ -21,7 +21,7 @@ const CITIES = [
 async function seed() {
   console.log("Seeding database...");
 
-  await pool.query("TRUNCATE TABLE users RESTART IDENTITY");
+  // await pool.query("TRUNCATE TABLE users RESTART IDENTITY");
 
   for (let start = 0; start < TOTAL; start += BATCH_SIZE) {
     const placeholders = [];
