@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Outlet } from 'react-router';
-import { Gauge, LayoutDashboard, Menu, Users } from 'lucide-react';
+// import {Gauge} from 'lucide-react'; 
 import NotificationBell from './NotificationBell';
+import { NavLink, Outlet, useNavigate } from 'react-router';
+import { LayoutDashboard, LogOut, Menu, Users } from 'lucide-react';
+import { DEMO_SESSION_KEY } from '../config';
 
 // Change the app name here, it shows in the sidebar
 const APP_NAME = 'UserDesk';
 
+
 const NAV = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/users', label: 'Users', icon: Users },
-  { to: '/lab', label: 'Performance Lab', icon: Gauge },
+  // { to: '/lab', label: 'Performance Lab', icon: Gauge },
 ];
 
 function readCollapsed() {
@@ -23,6 +26,13 @@ function readCollapsed() {
 }
 
 function Layout() {
+
+   const navigate = useNavigate();
+
+  const exitDemo = () => {
+    localStorage.removeItem(DEMO_SESSION_KEY);
+    navigate('/login', { replace: true });
+  };
   // collapsed = small icon sidebar on desktop
   // mobileOpen = slide-in menu on a phone
   const [collapsed, setCollapsed] = useState(readCollapsed);
@@ -124,6 +134,14 @@ function Layout() {
           </div>
 
           <div className="flex items-center gap-3">
+                        <button
+              className="icon-btn"
+              onClick={exitDemo}
+              title="Exit demo"
+              aria-label="Exit demo"
+            >
+              <LogOut size={20} strokeWidth={1.75} />
+            </button>
             <NotificationBell />
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-brand-500 to-brand-700 text-sm font-semibold text-white">
               A

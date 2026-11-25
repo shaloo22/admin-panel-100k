@@ -692,3 +692,61 @@ td {
     max-width: none;
   }
 }
+.city-select {
+  max-width: 100%;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.city-select:hover,
+.city-select:focus {
+  border-color: #cbd5e1;
+  background: white;
+}
+/* ----- Login page ----- */
+.btn-primary,
+.btn-ghost {
+  width: 100%;
+  padding: 11px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: var(--color-brand-600);
+  border: 1px solid var(--color-brand-600);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--color-brand-700);
+}
+
+.btn-ghost {
+  background: white;
+  border: 1px solid var(--color-brand-600);
+  color: var(--color-brand-700);
+}
+
+.btn-ghost:hover {
+  background: var(--color-brand-50);
+}
+
+.login-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+}
+
+.login-field:focus-within {
+  border-color: var(--color-brand-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-500) 18%, transparent);
+}

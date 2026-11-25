@@ -133,19 +133,19 @@ router.get("/cities", async (req, res) => {
 });
 
 // TEMPORARY
-router.get("/all", async (req, res) => {
-  try {
-    const count = Math.min(parseInt(req.query.count) || 20000, 20000);
-    const result = await pool.query(
-      "SELECT * FROM users WHERE deleted_at IS NULL ORDER BY id LIMIT $1",
-      [count],
-    );
-    res.json({ data: result.rows, count: result.rows.length });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to fetch users" });
-  }
-});
+// router.get("/all", async (req, res) => {
+//   try {
+//     const count = Math.min(parseInt(req.query.count) || 20000, 20000);
+//     const result = await pool.query(
+//       "SELECT * FROM users WHERE deleted_at IS NULL ORDER BY id LIMIT $1",
+//       [count],
+//     );
+//     res.json({ data: result.rows, count: result.rows.length });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Failed to fetch users" });
+//   }
+// });
 
 router.post("/export", async (req, res) => {
   try {

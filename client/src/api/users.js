@@ -26,11 +26,11 @@ export async function fetchCities() {
   return res.json();
 }
 
-export async function fetchManyUsers(count = 20000) {
-  const res = await fetch(`${API_URL}/api/users/all?count=${count}`);
-  if (!res.ok) throw new Error("Failed to fetch users");
-  return res.json();
-}
+// export async function fetchManyUsers(count = 20000) {
+//   const res = await fetch(`${API_URL}/api/users/all?count=${count}`);
+//   if (!res.ok) throw new Error("Failed to fetch users");
+//   return res.json();
+// }
 
 export async function exportUsersCsv({ filters, sort, order, ids }) {
   const res = await fetch(`${API_URL}/api/users/export`, {
